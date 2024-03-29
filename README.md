@@ -32,11 +32,11 @@ Has simple characteristic to read battery level can also be notifiable
 
 This is custom service where magic happens it has following characteristic:
 
-#### 61080002-8d6d-82b8-614a-1c8cb0f8dcc6
+#### WHOOP_CHAR_CMD_TO_STRAP 61080002-8d6d-82b8-614a-1c8cb0f8dcc6
 
 Writeable and Writeable without response, my opinion is that this is for setting alarm.
 
-#### 61080003-8d6d-82b8-614a-1c8cb0f8dcc6
+#### WHOOP_CHAR_CMD_FROM_STRAP 61080003-8d6d-82b8-614a-1c8cb0f8dcc6
 
 Messages for this characteristic are [here](./61080003-8d6d-82b8-614a-1c8cb0f8dcc6.txt) they are in hex.
 
@@ -58,13 +58,15 @@ aa4c00a724417860010173696770726f635f70646166000000000000000000000000000000000000
 
 Broken down:
 
-First 4 hex characters should be header, hex character should be 4 bits
+First 4 hex characters should be header, hex character is 4 bits
 
-First character should be PDU Type (4 bits), second should be RFU, ChSel, TxAdd and RxAdd (each is 1 bit), and remaining two should be Length (8 bits) in bytes.
+First character should be PDU Type (4 bits), second should be RFU, ChSel, TxAdd and RxAdd (each is 1 bit), and remaining two are Length (8 bits) in bytes.
 
 `00` is some separator or padding, next 4 characters (16 bits) seem to be same on packages of same length, with last 2 characters always being 24.
 
 After that rest should be data, there are few values it should transmit one is heart rate, temperature and Sp02, heart rate is commonly represented as `uint8` which has range of 0-255, temperature could be 0-100 for celsius or 32-212 for Fahrenheit, meaning that both of those should be represented by `uint8` and Sp02 should be between 0-100 so it can also be represented by `uint8`.
+
+If we look at data from [WHOOP_CHAR_DATA_FROM_STRAP](#whoop_char_data_from_strap-61080005-8d6d-82b8-614a-1c8cb0f8dcc6) we can see that header is same first 8 bits being aa, second two being Length, then separator/padding of `00`
 
 ```
 Header      Payload
@@ -81,18 +83,71 @@ aa4c        00  a724    417860010173696770726f635f706461660000000000000000000000
 
 Notifiable characteristic
 
-#### 61080004-8d6d-82b8-614a-1c8cb0f8dcc6
+#### WHOOP_CHAR_EVENTS_FROM_STRAP 61080004-8d6d-82b8-614a-1c8cb0f8dcc6
 
 -||-
 
-#### 61080005-8d6d-82b8-614a-1c8cb0f8dcc6
+#### WHOOP_CHAR_DATA_FROM_STRAP 61080005-8d6d-82b8-614a-1c8cb0f8dcc6
 
 -||-
 
 Messages for this characteristic are [here](./61080005-8d6d-82b8-614a-1c8cb0f8dcc6.txt)
 
+Messages when health monitor is opened are [here](./61080005-8d6d-82b8-614a-1c8cb0f8dcc6-health-monitor-29.3.17.05.txt) this was recorded on 29.3.2024 around 17:05, with heart rate being 75 at start going to 101 and back to 75, each log is about a second apart. and there is another log [here](./61080005-8d6d-82b8-614a-1c8cb0f8dcc6-health-monitor-29.3.17.22.txt) recorded at 17:22, with heart rate being around 78.
 
+Here is a part of logs:
 
-#### 61080007-8d6d-82b8-614a-1c8cb0f8dcc6
+Header seems to be `aa1800ff2802`, next 32 bits represent unix timestamp.
+I dont know what next 16 bits represent, but first byte seems to increment in decimal by 0, 8 or 16, and next byte seems to decrement by 5, until overflow.
+
+Next byte is heart rate.
+
+I don't know what next 68 bits are but they seem to either be 0 or something, I am not sure what that something should be, 
+* First byte seems to represent how many pairs of bytes are there `01` being two bytes, `02` being four bytes and `03` being 6 bytes, this could maybe go up two `04` or `05` depending on whether 16 bits in front of `0101` are part of this.
+* Next byte as int is in range of 10-248
+* Next byte is number in range of 1-7
+* Next byte if present is in range of 17-244
+* Next byte if present is either `02` or `03`, this might be due to lack of data
+* Only 1 entry with this byte
+* -||-
+
+Guesses on what this is, 
+
+* Sensor data, but not sure in what format, initial idea was that first number is measurement and second being sensor index, sort of `01` for temperature, `02` for Sp02 and so on, but numbers can repeat, and max is 7
+*  Checksum?
+* Blood oxygen only with first being reading of sensor and second being integrity, [here is why](https://www.reddit.com/r/whoop/comments/s0ojs0/any_way_to_see_blood_oxygen_spo2_levels_over_time/)
+
+Next `0101` seems to be another separator with last 4 bytes being checksum
+
+```
+Header          Unix                    HR  S
+aa1800ff2802    0f e6 06 66     6045    45  00 00 00 00 00 00 00 0000  0101     100092bd
+aa1800ff2802    10 e6 06 66     7040    45  00 00 00 00 00 00 00 0000  0101     1f77d31e
+aa1800ff2802    11 e6 06 66     803b    45  00 00 00 00 00 00 00 0000  0101     7e5ea0c5
+aa1800ff2802    12 e6 06 66     8836    45  00 00 00 00 00 00 00 0000  0101     54fd535b
+aa1800ff2802    13 e6 06 66     9831    45  00 00 00 00 00 00 00 0000  0101     8171c0af
+aa1800ff2802    14 e6 06 66     982c    45  00 00 00 00 00 00 00 0000  0101     41bdc5bd
+aa1800ff2802    15 e6 06 66     b027    45  00 00 00 00 00 00 00 0000  0101     edd2634b
+...
+aa1800ff2802    95 e6 06 66     0015    4d  00 00 00 00 00 00 00 0000  0101     a0b184ac
+aa1800ff2802    96 e6 06 66     0010    4c  02 66 06 11 02 00 00 0000  0101     5e078910
+aa1800ff2802    97 e6 06 66     180b    4c  01 30 04 00 00 00 00 0000  0101     88126edd
+aa1800ff2802    98 e6 06 66     2006    4c  01 bd 02 00 00 00 00 0000  0101     27775394
+aa1800ff2802    99 e6 06 66     3001    4c  02 6c 03 d6 02 00 00 0000  0101     75036709
+aa1800ff2802    99 e6 06 66     387c    4c  01 83 03 00 00 00 00 0000  0101     f65f00cf
+aa1800ff2802    9a e6 06 66     4077    4c  00 00 00 00 00 00 00 0000  0101     43c148ee
+...
+aa1800ff2802    b8 fc 06 66     b809    67  01 55 02 00 00 00 00 0000  0101     cda31650
+aa1800ff2802    b9 fc 06 66     b804    67  01 4e 02 00 00 00 00 0000  0101     4d0f2627
+aa1800ff2802    b9 fc 06 66     d07f    67  03 66 02 12 02 46 02 0000  0101     fe3ab9cb
+aa1800ff2802    ba fc 06 66     d87a    68  01 6b 02 00 00 00 00 0000  0101     d77a8fda
+aa1800ff2802    bb fc 06 66     e875    68  01 39 02 00 00 00 00 0000  0101     c20b9a04
+```
+
+While switch between whoop app and random app [logs](./61080005-8d6d-82b8-614a-1c8cb0f8dcc6-reloading-20.50.txt):
+
+It seems that ending packages with start of `aa10` are last ones in load
+
+#### WHOOP_CHAR_MEMFAULT 61080007-8d6d-82b8-614a-1c8cb0f8dcc6
 
 -||-

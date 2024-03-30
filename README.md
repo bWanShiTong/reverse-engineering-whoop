@@ -14,7 +14,7 @@ Has 4 characteristics: `DEVICE NAME`, `APPEARANCE`, `PERIPHERAL PREFERRED CONNEC
 
 ### Generic Attribute: 00001801-0000-1000-8000-00805f9b34fb
 
-Has 1 characteristic: `SERVICE CHANGED` 
+Has 1 characteristic: `SERVICE CHANGED`
 
 ### Bond Management: 0000181e-0000-1000-8000-00805f9b34fb
 
@@ -41,7 +41,6 @@ Writeable and Writeable without response, my opinion is that this is for setting
 Messages for this characteristic are [here](./61080003-8d6d-82b8-614a-1c8cb0f8dcc6.txt) they are in hex.
 
 These are few of those messages of different lengths:
-
 
 ```
 aa0c00fc24b4170001000000308d4b6a
@@ -102,20 +101,21 @@ I dont know what next 16 bits represent, but first byte seems to increment in de
 
 Next byte is heart rate.
 
-I don't know what next 68 bits are but they seem to either be 0 or something, I am not sure what that something should be, 
-* First byte seems to represent how many pairs of bytes are there `01` being two bytes, `02` being four bytes and `03` being 6 bytes, this could maybe go up two `04` or `05` depending on whether 16 bits in front of `0101` are part of this.
-* Next byte as int is in range of 10-248
-* Next byte is number in range of 1-7
-* Next byte if present is in range of 17-244
-* Next byte if present is either `02` or `03`, this might be due to lack of data
-* Only 1 entry with this byte
-* -||-
+I don't know what next 68 bits are but they seem to either be 0 or something, I am not sure what that something should be,
 
-Guesses on what this is, 
+- First byte seems to represent how many pairs of bytes are there `01` being two bytes, `02` being four bytes and `03` being 6 bytes, this could maybe go up two `04` or `05` depending on whether 16 bits in front of `0101` are part of this.
+- Next byte as int is in range of 10-248
+- Next byte is number in range of 1-7
+- Next byte if present is in range of 17-244
+- Next byte if present is either `02` or `03`, this might be due to lack of data
+- Only 1 entry with this byte
+- -||-
 
-* Sensor data, but not sure in what format, initial idea was that first number is measurement and second being sensor index, sort of `01` for temperature, `02` for Sp02 and so on, but numbers can repeat, and max is 7
-*  Checksum?
-* Blood oxygen only with first being reading of sensor and second being integrity, [here is why](https://www.reddit.com/r/whoop/comments/s0ojs0/any_way_to_see_blood_oxygen_spo2_levels_over_time/)
+Guesses on what this is,
+
+- Sensor data, but not sure in what format, initial idea was that first number is measurement and second being sensor index, sort of `01` for temperature, `02` for Sp02 and so on, but numbers can repeat, and max is 7
+- Checksum?
+- Blood oxygen only with first being reading of sensor and second being integrity, [here is why](https://www.reddit.com/r/whoop/comments/s0ojs0/any_way_to_see_blood_oxygen_spo2_levels_over_time/)
 
 Next `0101` seems to be another separator with last 4 bytes being checksum
 
@@ -147,6 +147,88 @@ aa1800ff2802    bb fc 06 66     e875    68  01 39 02 00 00 00 00 0000  0101     
 While switch between whoop app and random app [logs](./61080005-8d6d-82b8-614a-1c8cb0f8dcc6-reloading-20.50.txt):
 
 It seems that ending packages with start of `aa10` are last ones in load
+
+Packages with header `aa5c`
+
+These packages have similar design as ones above
+
+```
+aa5c00f02f0c050058070074310766704c80542c0147015c0300000000000000008f05ff002ec43bcd8c92bdaeb7be3ef6647b3f0000c446cd8c92bdaeb7be3ef6647b3f390253025903520241016005010c020c0000000000000001f32f9943
+aa5c00f02f0c050058070074310766704c80542c0147015c0300000000000000008f05ff002ec43bcd8c92bdaeb7be3ef6647b3f0000c446cd8c92bdaeb7be3ef6647b3f390253025903520241016005010c020c0000000000000001f32f9943
+aa5c00f02f0c050d58070081310766080c80542c0146015f030000000000000000d900ff804d823cd78398bd8533b83ecd7c7c3f0000e046d78398bd8533b83ecd7c7c3f390253025c03540241016005010c020c0000000000000001f5aa1154
+aa5c00f02f0c050d58070081310766080c80542c0146015f030000000000000000d900ff804d823cd78398bd8533b83ecd7c7c3f0000e046d78398bd8533b83ecd7c7c3f390253025c03540241016005010c020c0000000000000001f5aa1154
+```
+
+First 7 bytes being header. Next 3 bytes being seconds or some kind of time (NOT UNIX), then 1 byte separator, next 4 bytes being unix, then next 2 bytes being same as packet about where first is incrementing and second decrementing.
+
+Next byte is either `80` or `84` in hex, next byte is always `54`, next 2 bytes sometimes change but don't know to what.
+
+Next byte seems to be heart rate.
+
+Next 7 bytes could be some kind of integer, not sure what.
+
+Next 2 bytes are padding.
+
+Next 21 bytes seem to be some data:
+
+* First 4 bytes seem to be something
+    - First byte is either 0 or 128
+* Next bytes seems to be big integer, mostly `ff`
+* Next 3 bytes IDK
+* Next byte seems to be heart rate
+* Next 3 bytes IDK
+* Next byte seems to be only around 60 or around 190
+* Next 3 bytes IDK
+* Next bytes is around 60 with few outliers around 190
+* Next 3 bytes IDK
+* Next bytes is around 63 with few outliers around 190
+
+Notes:
+* These pairs of 4 bytes where first 3 bytes are "random" and next byte being seeming to be heart rate, could be some type of heart rate occurrences.
+
+Next 32 bytes seem to be similar to data above:
+
+* First byte seems to be mostly zero.
+* Next 5 bytes IDK
+* Next byte seems to be either around 60 or 190
+* Next 3 bytes IDK
+* Next bytes is around 60 with few outliers around 190
+* Next 3 bytes IDK
+* Next bytes is around 63 with few outliers around 190
+* Next byte is either in decimal 11, 26, 30 or 57, this might be due to lack of data
+* Next byte is `02`
+* Next bytes changes with byte before where 11=92, 26=107, 30=111, 57=83
+* Next byte is `02`
+* Next bytes middle value changes with two bytes before, where for first bytes value being 11, this was around 140, first bytes being 26, this was around 10, etc.
+* Next byte is either `03` or `04`
+* Next byte seems to be somewhat connected with previous byte
+* Next byte is `02`
+* Next byte is sort of changing
+* Next byte is `01`
+* Next byte has few values, decimal: 96, 80, 160
+* Next byte is either `03`, `04`, `05` or `06`
+* Next 4 bytes seem to be `010c020c`
+* Next byte seems to be small < 16 number
+
+Next 7 bytes are padding 
+
+Remaining bytes seem to be checksum
+
+Packages with header `aa1c`
+
+First 7 bytes are header, next 8 bytes seem to be unix, 
+
+Next 3 bytes are some data
+
+Next 6 bytes seem to be padding
+
+Next 2 bytes are some data
+
+Next 9 bytes seem to be padding
+
+And last 4 bytes seem to be checksum
+
+What these two data packages represent i dont know, it seems semi random, need to check with context of packets before.
 
 #### WHOOP_CHAR_MEMFAULT 61080007-8d6d-82b8-614a-1c8cb0f8dcc6
 

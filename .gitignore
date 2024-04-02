@@ -2,3 +2,5 @@
 /apktool-whoop
 /whoop.apk
 /__pycache__
+*.log
+./.idea

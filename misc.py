@@ -1,7 +1,10 @@
 def little_endian_unix(buffer: str) -> int:
-    buffer = [buffer[i:i+2] for i in range(0, 8 , 2)][::-1]
+    buffer = [buffer[i:i+2] for i in range(0, len(buffer) , 2)][::-1]
     return int(''.join(buffer), 16)
 
+def pretty_print(buffer: str, as_int: bool=False):
+    buffer = [str(int(buffer[i:i+2], 16)) if as_int else buffer[i:i+2] for i in range(0, len(buffer), 2)]
+    print(' '.join(buffer))
 
 def decode_5c(package: str):
     header = package[:14]
@@ -35,6 +38,7 @@ def decode_5c(package: str):
     padding = package[170:184]
     assert int(padding, 16) == 1
     checksum = package[184:]
+    
 
 def decode_1c(package: str):
     header = package[:14]
@@ -44,9 +48,17 @@ def decode_1c(package: str):
     padding = package[28:34]
     assert int(padding, 16) == 0, "Non zero padding"
 
-    s1 = package[34:38]
-    padding = package[38:56]
+    s1 = package[34:40]
+    padding = package[40:56]
     assert int(padding, 16) == 0, "Non zero padding"
 
     checksum = package[56:]
-    print(len(checksum) / 2)
+
+def decode_10(package: str):
+    header = package[:14]
+    unix = package[14:22]
+    data = package[22:32]
+    header = package[32:40]
+
+def decode_2c(package: str):
+    print(package)

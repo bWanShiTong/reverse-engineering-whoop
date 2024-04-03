@@ -230,6 +230,27 @@ And last 4 bytes seem to be checksum
 
 What these two data packages represent i dont know, it seems semi random, need to check with context of packets before.
 
+See [here](./misc.py) for more function of decoding.
+
 #### WHOOP_CHAR_MEMFAULT 61080007-8d6d-82b8-614a-1c8cb0f8dcc6
 
 -||-
+
+
+## Notes
+
+* As it is well known device broadcasts data to phone which sends it to servers which give all metrics, but I am not sure in which way is it done, that is, is mobile phone just a proxy which passes data from band to servers, or does phone do some decoding, if phone decodes data before sending it to server some of data could be reverse engineered from apk
+
+* I think that sleep detection is done on phone, where it detects periods where phone is not being used and checks if heart rate, Sp02 and temperature correspond, reason why I think this is that it has detected few naps while I was working, my RHR is 55-ish and my heart rate when working is 60-ish (I work as dev).
+
+* As mentioned above, there seem to be some problems if device is shoving Sp02 for 24h/7, but I think that is still being broadcasted all the time to calculate rest.
+
+* I think that HRV is calculated partially on device and partially on phone/servers, my reason to think this is that data sent over night is roughly the same as data being sent during day (as mentioned above I don't think the device itself detects you sleeping), in order to calculate HRV on server you need to have heart beets and I don't think there is enough data transferred between device and phone for that to be true, I think part of it is calculated for periods on device and that is transferred to phone.
+
+* I think something similar is with recording of Sp02, but slightly different, my opinion is that it records it few times then it has something like accuracy level or sureness level, and then rest is sent to servers for processing
+
+* It seems that on some packages that are 2 timestamps, or duration and timestamp, I think that this is how 24h heart rate is transferred to phone/servers
+
+* Strain: this is most likely just heart rate and maybe Sp02
+
+* Sleep performance: I think this is just duration of actual sleep, compared to recommended duration, my REM and deep sleep are almost always exact percentage so I might be wrong.

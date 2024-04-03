@@ -31,7 +31,7 @@ for package_type in packages:
     packages_ = packages[package_type]
     function = globals().get(f"decode_{package_type}")
     if function is None:
-        print(f"{package_type} not found")
+        print(f"{package_type} not found: {len(packages_)}")
         continue
 
     for package in packages_:

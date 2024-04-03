@@ -82,3 +82,35 @@ def decode_14(package: str):
     unix = package[16:24]
     s1 = package[24:40]
     checksum = package[40:48]
+
+def decode_44(package: str):
+    header = package[:10]
+    assert header == "aa44000f32", "Different header"
+
+    s0 = package[10:12] # Some kind of counter
+
+    assert int(package[12:14], 16) == 2
+    assert int(package[14:16], 16) == 0
+
+    s1 = package[16:22]
+
+    assert int(package[22:24], 16) == 102
+    crc = package[24:26] # This seems to increment by 8 after every 3 entries
+
+    s2 = package[26:28]
+
+    assert int(package[28:30], 16) == 52
+    assert int(package[30:32], 16) == 0
+    assert int(package[32:34], 16) == 1
+    
+
+    data = package[34:134] # This data is most of packet idk what it is, it seems to octagonally repeat shifted, example:
+    # 32 30 38 31 3a (20 42 4c 45 3a 20 48 45 4c) 4c 4f 3a 20 46 47 20 53 4f 43 20 28 74 65 6e 74 68 73 29 3a 20 32 34 39 0a 20 20 39 2c 20 31 33 35 39 31 32
+    # 30 38 33 3a (20 42 4c 45 3a 20 48 45 4c) 4c 4f 3a 20 4e 6f 72 64 69 63 20 56 65 72 3a 20 31 37 2e 32 2e 32 2e 30 0a 20 20 39 2c 20 31 33 35 39 31 32 31
+    # 30 35 3a (20 42 4c 45 3a 20 48 45 4c) 4c 4f 3a 20 52 65 70 6f 72 74 69 6e 67 20 63 68 61 72 67 65 20 73 74 61 74 65 20 61 73 3a 20 30 0a 20 20 39 2c 20
+    # 31 33 35 39 31 32 31 30 36 3a (20 42 4c 45 3a 20 48 45 4c) 4c 4f 3a 20 53 65 6e 64 20 68 65 6c 6c 6f 20 70 61 63 6b 65 74 0a 20 20 39 2c 20 31 33 35 39
+    # 31 32 31 30 36 3a (20 42 4c 45 3a 20 48 45 4c) 4c 4f 3a 20 47
+    # but this might just be an accident
+
+    assert int(package[134:136], 16) == 0
+    checksum = package[136:144]

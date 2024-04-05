@@ -14,8 +14,8 @@ for file in files:
 
         timestamp = ' '.join([buffer[12:20][i:i+2] for i in range(0, 8, 2)][::-1]) # Little endian timestamp
 
-        s = buffer[26:40]
+        s = buffer[26:44]
         s = [s[i:i+2] for i in range(0, len(s), 2) if s[i:i+2]]
         s = ' '.join(s)
         
-        print(f'{header}\t{timestamp}\t{buffer[20:24]}\t{buffer[24:26]}  {s} {buffer[40:44]}  {buffer[44:48]}\t{buffer[48:]}')
+        print(f'{header}\t{timestamp}\t{buffer[20:24]}\t{buffer[24:26]}  {s}  {buffer[44:48]}\t{buffer[48:]}')

@@ -1,4 +1,4 @@
-def little_endian_unix(buffer: str) -> int:
+def little_endian(buffer: str) -> int:
     buffer = [buffer[i:i+2] for i in range(0, len(buffer) , 2)][::-1]
     return int(''.join(buffer), 16)
 
@@ -23,7 +23,12 @@ def decode_5c(package: str):
 
     heart_rate = package[42:44] # ?
 
-    s00 = package[44:62]
+    count = int(package[44:46], 16)
+    s00 = bytearray.fromhex(package[46:62]) # RR?
+    rr = []
+    for i in range(0, count, 2):
+        buf = s00[i:i+2]
+        rr.append(int.from_bytes(buf, 'little'))
 
     data0 = package[62:104]
 
@@ -114,3 +119,34 @@ def decode_44(package: str):
 
     assert int(package[134:136], 16) == 0
     checksum = package[136:144]
+
+def decode_0c(package: str):
+    header = package[:10]
+    assert header == "aa0c00fc24", "Invalid header"
+
+    crc = package[10:12] # Seems to increment by 3
+
+    data = package[12:20]
+
+    padding = package[20:24]
+    assert int(padding, 16) == 0
+
+    checksum = package[24:32]
+
+def decode_18(package: str):
+    header = package[:8]
+    assert header == "aa1800ff", "Invalid header"
+
+    if package[8:10] == '28':
+        unix = package[12:20]
+        s0 = package[20:22]
+        crc = package[22:24]
+        s1 = package[24:48]
+    elif package[8:10] == '30':
+        s0 = package[8:16]
+        unix = package[16:24]
+        s1 = package[24:48]
+    else:
+        raise "Unsupported"
+
+    checksum = package[48:56]

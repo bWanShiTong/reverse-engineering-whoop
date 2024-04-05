@@ -101,47 +101,34 @@ I dont know what next 16 bits represent, but first byte seems to increment in de
 
 Next byte is heart rate.
 
-I don't know what next 68 bits are but they seem to either be 0 or something, I am not sure what that something should be,
+Next 68 bits seem to represent RR, with first byte being count of measurements and following bytes grouped by 2 bytes are RR
 
-- First byte seems to represent how many pairs of bytes are there `01` being two bytes, `02` being four bytes and `03` being 6 bytes, this could maybe go up two `04` or `05` depending on whether 16 bits in front of `0101` are part of this.
-- Next byte as int is in range of 10-248
-- Next byte is number in range of 1-7
-- Next byte if present is in range of 17-244
-- Next byte if present is either `02` or `03`, this might be due to lack of data
-- Only 1 entry with this byte
-- -||-
-
-Guesses on what this is,
-
-- Sensor data, but not sure in what format, initial idea was that first number is measurement and second being sensor index, sort of `01` for temperature, `02` for Sp02 and so on, but numbers can repeat, and max is 7
-- Checksum?
-- Blood oxygen only with first being reading of sensor and second being integrity, [here is why](https://www.reddit.com/r/whoop/comments/s0ojs0/any_way_to_see_blood_oxygen_spo2_levels_over_time/)
 
 Next `0101` seems to be another separator with last 4 bytes being checksum
 
 ```
-Header          Unix                    HR  S
-aa1800ff2802    0f e6 06 66     6045    45  00 00 00 00 00 00 00 0000  0101     100092bd
-aa1800ff2802    10 e6 06 66     7040    45  00 00 00 00 00 00 00 0000  0101     1f77d31e
-aa1800ff2802    11 e6 06 66     803b    45  00 00 00 00 00 00 00 0000  0101     7e5ea0c5
-aa1800ff2802    12 e6 06 66     8836    45  00 00 00 00 00 00 00 0000  0101     54fd535b
-aa1800ff2802    13 e6 06 66     9831    45  00 00 00 00 00 00 00 0000  0101     8171c0af
-aa1800ff2802    14 e6 06 66     982c    45  00 00 00 00 00 00 00 0000  0101     41bdc5bd
-aa1800ff2802    15 e6 06 66     b027    45  00 00 00 00 00 00 00 0000  0101     edd2634b
+Header          Unix                    HR  C   RR    RR    RR    RR
+aa1800ff2802    0f e6 06 66     6045    45  00 00 00 00 00 00 00 00 00  0101     100092bd
+aa1800ff2802    10 e6 06 66     7040    45  00 00 00 00 00 00 00 00 00  0101     1f77d31e
+aa1800ff2802    11 e6 06 66     803b    45  00 00 00 00 00 00 00 00 00  0101     7e5ea0c5
+aa1800ff2802    12 e6 06 66     8836    45  00 00 00 00 00 00 00 00 00  0101     54fd535b
+aa1800ff2802    13 e6 06 66     9831    45  00 00 00 00 00 00 00 00 00  0101     8171c0af
+aa1800ff2802    14 e6 06 66     982c    45  00 00 00 00 00 00 00 00 00  0101     41bdc5bd
+aa1800ff2802    15 e6 06 66     b027    45  00 00 00 00 00 00 00 00 00  0101     edd2634b
 ...
-aa1800ff2802    95 e6 06 66     0015    4d  00 00 00 00 00 00 00 0000  0101     a0b184ac
-aa1800ff2802    96 e6 06 66     0010    4c  02 66 06 11 02 00 00 0000  0101     5e078910
-aa1800ff2802    97 e6 06 66     180b    4c  01 30 04 00 00 00 00 0000  0101     88126edd
-aa1800ff2802    98 e6 06 66     2006    4c  01 bd 02 00 00 00 00 0000  0101     27775394
-aa1800ff2802    99 e6 06 66     3001    4c  02 6c 03 d6 02 00 00 0000  0101     75036709
-aa1800ff2802    99 e6 06 66     387c    4c  01 83 03 00 00 00 00 0000  0101     f65f00cf
-aa1800ff2802    9a e6 06 66     4077    4c  00 00 00 00 00 00 00 0000  0101     43c148ee
+aa1800ff2802    95 e6 06 66     0015    4d  00 00 00 00 00 00 00 00 00  0101     a0b184ac
+aa1800ff2802    96 e6 06 66     0010    4c  02 66 06 11 02 00 00 00 00  0101     5e078910
+aa1800ff2802    97 e6 06 66     180b    4c  01 30 04 00 00 00 00 00 00  0101     88126edd
+aa1800ff2802    98 e6 06 66     2006    4c  01 bd 02 00 00 00 00 00 00  0101     27775394
+aa1800ff2802    99 e6 06 66     3001    4c  02 6c 03 d6 02 00 00 00 00  0101     75036709
+aa1800ff2802    99 e6 06 66     387c    4c  01 83 03 00 00 00 00 00 00  0101     f65f00cf
+aa1800ff2802    9a e6 06 66     4077    4c  00 00 00 00 00 00 00 00 00  0101     43c148ee
 ...
-aa1800ff2802    b8 fc 06 66     b809    67  01 55 02 00 00 00 00 0000  0101     cda31650
-aa1800ff2802    b9 fc 06 66     b804    67  01 4e 02 00 00 00 00 0000  0101     4d0f2627
-aa1800ff2802    b9 fc 06 66     d07f    67  03 66 02 12 02 46 02 0000  0101     fe3ab9cb
-aa1800ff2802    ba fc 06 66     d87a    68  01 6b 02 00 00 00 00 0000  0101     d77a8fda
-aa1800ff2802    bb fc 06 66     e875    68  01 39 02 00 00 00 00 0000  0101     c20b9a04
+aa1800ff2802    b8 fc 06 66     b809    67  01 55 02 00 00 00 00 00 00  0101     cda31650
+aa1800ff2802    b9 fc 06 66     b804    67  01 4e 02 00 00 00 00 00 00  0101     4d0f2627
+aa1800ff2802    b9 fc 06 66     d07f    67  03 66 02 12 02 46 02 00 00  0101     fe3ab9cb
+aa1800ff2802    ba fc 06 66     d87a    68  01 6b 02 00 00 00 00 00 00  0101     d77a8fda
+aa1800ff2802    bb fc 06 66     e875    68  01 39 02 00 00 00 00 00 00  0101     c20b9a04
 ```
 
 While switch between whoop app and random app [logs](./61080005-8d6d-82b8-614a-1c8cb0f8dcc6-reloading-20.50.txt):
@@ -165,9 +152,9 @@ Next byte is either `80` or `84` in hex, next byte is always `54`, next 2 bytes 
 
 Next byte seems to be heart rate.
 
-Next 7 bytes could be some kind of integer, not sure what.
+Next byte seems to be count of RR values.
 
-Next 2 bytes are padding.
+Next 8 bytes seem to be corresponding RR values.
 
 Next 21 bytes seem to be some data:
 
@@ -209,6 +196,8 @@ Next 32 bytes seem to be similar to data above:
 * Next byte is either `03`, `04`, `05` or `06`
 * Next 4 bytes seem to be `010c020c`
 * Next byte seems to be small < 16 number
+
+Notes: `02`, `03`, `04` etc, could be sensor position
 
 Next 7 bytes are padding 
 

@@ -1,6 +1,5 @@
 def little_endian(buffer: str) -> int:
-    buffer = [buffer[i:i+2] for i in range(0, len(buffer) , 2)][::-1]
-    return int(''.join(buffer), 16)
+    return int.from_bytes(bytearray.fromhex(buffer), 'little')
 
 def pretty_print(buffer: str, as_int: bool=False):
     buffer = [str(int(buffer[i:i+2], 16)).ljust(4) if as_int else buffer[i:i+2] for i in range(0, len(buffer), 2)]
@@ -11,6 +10,7 @@ def decode_5c(package: str):
     unix_s = package[14:20]
     separator = package[20:22]
     unix_e = package[22:30]
+
     crc_1 = package[30:32]
     crc_2 = package[32:34]
 

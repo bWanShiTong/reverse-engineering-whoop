@@ -7,7 +7,7 @@ files = [
 
 for file in files:
     print(file)
-    data = open(file, 'r').read().split('\n')
+    data = open(f'data/{file}', 'r').read().split('\n')
 
     for buffer in data:
         header = buffer[:12]

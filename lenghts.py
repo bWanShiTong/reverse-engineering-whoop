@@ -1,4 +1,4 @@
-data = open('61080003-8d6d-82b8-614a-1c8cb0f8dcc6.txt', 'r')
+data = open('data/61080003-8d6d-82b8-614a-1c8cb0f8dcc6.txt', 'r')
 
 s = {}
 

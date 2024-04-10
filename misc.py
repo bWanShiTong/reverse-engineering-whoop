@@ -150,3 +150,15 @@ def decode_18(package: str):
         raise "Unsupported"
 
     checksum = package[48:56]
+
+
+def decode_48(package: str):
+    # 15, 14, 12, 11:37, NO alrams
+    header = package[:10]
+    assert header == "aa4800f323", "Invalid header"
+
+    packet_count = package[10:12] # Not sure but seems to increment with every sent package
+    assert package[12:14] == "78"
+    assert package[14:16] == "01"
+
+    pretty_print(package[16:52], True)

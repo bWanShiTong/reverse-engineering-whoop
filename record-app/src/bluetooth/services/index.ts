@@ -6,6 +6,31 @@ import { readHeartRateData } from "./heart";
 
 const Buffer = require("buffer/").Buffer;
 
+function monitorCharacteristic(deviceId: string, characteristic: string) {
+  manager.monitorCharacteristicForDevice(
+    deviceId,
+    "61080001-8d6d-82b8-614a-1c8cb0f8dcc6",
+    characteristic,
+    (error, payload) => {
+      if (error) {
+        if (error.errorCode != 201) {
+          console.error(error);
+        }
+        return;
+      }
+      let unix = Math.round(Date.now() / 1000);
+      let data = Buffer.from(payload.value, "base64").toString("hex");
+      store.dispatch(
+        addWhoopPackage({
+          unix,
+          data,
+          characteristic,
+        })
+      );
+    }
+  );
+}
+
 export default function setupServices(deviceId: string) {
   manager.monitorCharacteristicForDevice(
     deviceId,
@@ -32,50 +57,8 @@ export default function setupServices(deviceId: string) {
     }
   );
 
-  manager.monitorCharacteristicForDevice(
-    deviceId,
-    "61080001-8d6d-82b8-614a-1c8cb0f8dcc6",
-    "61080005-8d6d-82b8-614a-1c8cb0f8dcc6",
-    (error, payload) => {
-      if (error) {
-        if (error.errorCode != 201) {
-          console.error(error);
-        }
-        return;
-      }
-      let unix = Math.round(Date.now() / 1000);
-      let data = Buffer.from(payload.value, "base64").toString("hex");
-      store.dispatch(
-        addWhoopPackage({
-          unix,
-          data,
-          characteristic: "61080005-8d6d-82b8-614a-1c8cb0f8dcc6",
-        })
-      );
-    }
-  );
-
-  manager.monitorCharacteristicForDevice(
-    deviceId,
-    "61080001-8d6d-82b8-614a-1c8cb0f8dcc6",
-    "61080005-8d6d-82b8-614a-1c8cb0f8dcc6",
-    (error, payload) => {
-      if (error) {
-        if (error.errorCode != 201) {
-          console.error(error);
-        }
-        return;
-      }
-
-      let unix = Math.round(Date.now() / 1000);
-      let data = Buffer.from(payload.value, "base64").toString("hex");
-      store.dispatch(
-        addWhoopPackage({
-          unix,
-          data,
-          characteristic: "61080005-8d6d-82b8-614a-1c8cb0f8dcc6",
-        })
-      );
-    }
-  );
+  monitorCharacteristic(deviceId, "61080005-8d6d-82b8-614a-1c8cb0f8dcc6");
+  monitorCharacteristic(deviceId, "61080005-8d6d-82b8-614a-1c8cb0f8dcc6");
+  monitorCharacteristic(deviceId, "61080004-8d6d-82b8-614a-1c8cb0f8dcc6");
+  monitorCharacteristic(deviceId, "61080007-8d6d-82b8-614a-1c8cb0f8dcc6");
 }

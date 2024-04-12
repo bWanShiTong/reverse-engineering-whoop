@@ -1,5 +1,10 @@
+from datetime import datetime
+
 def little_endian(buffer: str) -> int:
     return int.from_bytes(bytearray.fromhex(buffer), 'little')
+
+def big_endian(buffer: str) -> int:
+    return int.from_bytes(bytearray.fromhex(buffer), 'big')
 
 def pretty_print(buffer: str, as_int: bool=False):
     buffer = [str(int(buffer[i:i+2], 16)).ljust(4) if as_int else buffer[i:i+2] for i in range(0, len(buffer), 2)]
@@ -42,20 +47,40 @@ def decode_5c(package: str):
     assert int(padding, 16) == 1
     checksum = package[184:]
     
-
+mid = []
 def decode_1c(package: str):
-    header = package[:14]
-    unix = package[14:22]
-    s0 = package[22:28]
+    header = package[:8]
+    assert header == "aa1c00ab", "Invalid header"
 
-    padding = package[28:34]
-    assert int(padding, 16) == 0, "Non zero padding"
+    package_type = package[8:10]
+    if package_type == '30':
+        s0 = little_endian(package[10:16]) # This seems to be incrementing maybe a package count
+        unix = little_endian(package[16:24])
 
-    s1 = package[34:40]
-    padding = package[40:56]
-    assert int(padding, 16) == 0, "Non zero padding"
+        s1 = package[24:48]
+        
+        d0 = package[48:56]
+        assert d0 == "0b000100", "Invalid s4"
+    elif package_type == '31':
+        crc = package[10:12] # Increments by 3
+        padding = package[12:14]
+        assert int(padding, 16) == 2, "Invalid padding"
 
-    checksum = package[56:]
+        unix = little_endian(package[14:22]) # ?
+
+        temperature = little_endian(package[22:34]) / 100000 # ?
+        
+        crc = package[34:36] # Increments by 5
+        s0 = package[36:38] # Around range 152
+
+        last_bytes = package[38:56]
+        assert last_bytes == "000001000000000000", "Invalid last bytes"
+    else:
+        print(package_type)
+        raise "Wong"
+
+    checksum = package[56:64]
+    
 
 def decode_10(package: str):
     header = package[:14]
@@ -78,7 +103,10 @@ def decode_2c(package: str):
         unix = package[16:24]
 
         rest = package[24:88]
+    elif package[8:10] == '24':
+        pass
     else:
+        print(package[8:10])
         raise "Wong"
 
 def decode_14(package: str):
@@ -160,5 +188,3 @@ def decode_48(package: str):
     packet_count = package[10:12] # Not sure but seems to increment with every sent package
     assert package[12:14] == "78"
     assert package[14:16] == "01"
-
-    pretty_print(package[16:52], True)

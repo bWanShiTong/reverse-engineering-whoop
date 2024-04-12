@@ -1,23 +1,20 @@
 from misc import *
 import numpy as np
+from os import listdir
 
-files = [
-    # '61080005-8d6d-82b8-614a-1c8cb0f8dcc6.txt',
-    # '61080005-8d6d-82b8-614a-1c8cb0f8dcc6-reloading-20.50.txt',
-    # '61080005-8d6d-82b8-614a-1c8cb0f8dcc6-reloading-22.25-after-5mins.txt',
-    # '61080005-8d6d-82b8-614a-1c8cb0f8dcc6-periodicly.txt',
-    # '61080005-8d6d-82b8-614a-1c8cb0f8dcc6-overnight.txt',
-    'captured-packages.txt'
-]
-
+files = listdir('./data')
 
 packages = {}
 
 for file in files:
+    if not file == "61080005-8d6d-82b8-614a-1c8cb0f8dcc6-overnight.txt":continue
     data = open(f'data/{file}', 'r').read().split('\n')
 
     for package in data:
         header = package[2:4]
+        if not header:
+            continue
+
         if header_packages := packages.get(header):
             header_packages.append(package)
         else:

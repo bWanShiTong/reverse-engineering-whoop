@@ -36,3 +36,4 @@ yarn-error.*
 android/
 ios/
 .env
+record-app.apk

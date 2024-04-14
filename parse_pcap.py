@@ -1,27 +1,45 @@
 from pyshark import FileCapture
+from os import listdir
 
-file = "alarm-lot.log.last"
+
 address = "F2:29:22:3E:72:78".lower()
 
-packages = FileCapture(f"btsnoop_hci.log")
 
 def process_packet(packet):
     return packet.btatt.value.replace(':', '')
 
-with open('data/captured-packages.txt', 'a') as file:
+
+read_packages = []
+write_packages = []
+
+for file in listdir('logs/'):
+    print(file)
+    packages = FileCapture(f"logs/{file}")
+    
     for packet in packages:
         try:
-            if packet.bthci_acl.dst_bd_addr.lower() != address:
+            read = packet.bthci_acl.dst_bd_addr.lower() == address
+            write = packet.bthci_acl.src_bd_addr.lower() == address
+                
+            if not (read or write):
                 continue
 
-            # if packet.bthci_acl.src_bd_addr.lower() != address:
-                # continue
-            
             packet = process_packet(packet)
             if packet == "0100":
                 continue
-            
-            file.write(f"{packet}\n")
-            # print(packet)
+                
+            if write:
+                write_packages.append(packet)
+            else:
+                read_packages.append(packet)
         except AttributeError:
             continue
+
+    packages.close()
+
+with open('data/captured-packages-read.txt', 'w') as file:
+    file.write('\n'.join(read_packages).strip())
+
+
+with open('data/captured-packages-write.txt', 'w') as file:
+    file.write('\n'.join(write_packages).strip())

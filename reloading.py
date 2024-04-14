@@ -7,7 +7,7 @@ files = listdir('./data')
 packages = {}
 
 for file in files:
-    if not file == "61080005-8d6d-82b8-614a-1c8cb0f8dcc6-overnight.txt":continue
+    if not file == "captured-packages-read.txt":continue
     data = open(f'data/{file}', 'r').read().split('\n')
 
     for package in data:

@@ -10,6 +10,25 @@ def pretty_print(buffer: str, as_int: bool=False):
     buffer = [str(int(buffer[i:i+2], 16)).ljust(4) if as_int else buffer[i:i+2] for i in range(0, len(buffer), 2)]
     print(' '.join(buffer))
 
+def decode_02(package: str):
+    # I have no clue what is this
+    pass
+
+def decode_24(package: str):
+    header = package[:10]
+    assert header == "aa2400fa30", "Invalid header"
+
+    s0 = package[10:16]
+
+    unix = little_endian(package[16:24])
+    s1 = package[24:34]
+    s2 = little_endian(package[34:42])
+    s3 = little_endian(package[42:50])
+    
+    s4 = package[50:72] # Not sure what any of these are
+
+    checksum = package[72:80]
+
 def decode_5c(package: str):
     header = package[:14]
     unix_s = package[14:20]
@@ -47,7 +66,13 @@ def decode_5c(package: str):
     assert int(padding, 16) == 1
     checksum = package[184:]
     
-mid = []
+def decode_08(package: str):
+    header = package[:10]
+    assert header == "aa0800a823", "Invalid header"
+
+    s0 = package[10:16] # IDC
+    checksum = package[16:24]
+
 def decode_1c(package: str):
     header = package[:8]
     assert header == "aa1c00ab", "Invalid header"

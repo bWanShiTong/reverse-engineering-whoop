@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.record.app"
@@ -31,6 +33,9 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["react-native-ble-plx"]
+    "plugins": [
+      "react-native-ble-plx",
+      "react-native-background-fetch"
+    ]
   }
 }

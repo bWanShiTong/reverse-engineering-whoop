@@ -45,26 +45,6 @@ function sendCommand(deviceId: string) {
     });
 }
 
-async function backgroundService(taskId: string) {
-  console.log(taskId)
-  let selectedDevice = store.getState().device.device;
-  let devices = await manager.connectedDevices([]);
-  for (let device of devices) {
-    if (device.id === selectedDevice) {
-      BackgroundFetch.finish(taskId);
-      return;
-    }
-  }
-
-  connectToDevice(selectedDevice);
-  BackgroundFetch.finish(taskId);
-}
-
-async function backgroundServiceTimeout(taskId: string) {
-  console.error(taskId);
-  BackgroundFetch.finish(taskId);
-}
-
 export default function Device() {
   let selectedDevice = selectState((state) => state?.device?.device);
   let [packageCount, setPackageCount] = useState(0);
@@ -72,16 +52,6 @@ export default function Device() {
   function packageCountFunc() {
     setPackageCount(store.getState().whoop.packages.length);
   }
-
-  useEffect(() => {
-    BackgroundFetch.configure(
-      { minimumFetchInterval: 15 },
-      backgroundService,
-      backgroundServiceTimeout
-    ).then((status) =>
-      console.log("[BackgroundFetch] configure status: ", status)
-    );
-  }, []);
 
   requestBluetoothPermission();
 

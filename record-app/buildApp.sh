@@ -1,5 +1,9 @@
 #!/bin/bash
 
+rm -rf android
+
+expo prebuild
+
 cd android
 ./gradlew assembleRelease
 

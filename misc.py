@@ -43,8 +43,6 @@ def decode_5c(package: str):
     s2 = package[38:40]
     s3 = package[40:42]
 
-    assert s1 == "54"
-
     heart_rate = package[42:44] # ?
 
     count = int(package[44:46], 16)
@@ -63,7 +61,7 @@ def decode_5c(package: str):
 
     padding = package[174:184]
     
-    assert int(padding, 16) == 1
+    assert int(padding, 16) == 1 or int(padding, 16) == 2
     checksum = package[184:]
     
 def decode_08(package: str):
@@ -96,10 +94,10 @@ def decode_1c(package: str):
         temperature = little_endian(package[22:34]) / 100000 # ?
         
         crc = package[34:36] # Increments by 5
-        s0 = package[36:38] # Around range 152
-
-        last_bytes = package[38:56]
-        assert last_bytes == "000001000000000000", "Invalid last bytes"
+        s0 = package[36:40] # Around range 152
+        
+        last_bytes = package[40:56]
+        assert last_bytes == "0001000000000000", "Invalid last bytes"
     else:
         print(package_type)
         raise "Wong"

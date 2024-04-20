@@ -1,5 +1,5 @@
-import {AppRegistry} from 'react-native';
-import App from './App';
+import { AppRegistry } from "react-native";
+import App from "./App";
 
 import BackgroundFetch from "react-native-background-fetch";
 
@@ -27,11 +27,11 @@ async function backgroundServiceTimeout(taskId) {
 
 const backgroundFetchHeadlessTask = async (event) => {
   if (event.timeout) {
-    backgroundServiceTimeout(event.taskId)
+    backgroundServiceTimeout(event.taskId);
     return;
   }
 
   await backgroundService(event.taskId);
-}
+};
 
 BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);

@@ -1,9 +1,11 @@
 from pyshark import FileCapture
 from os import listdir
+from datetime import datetime
 
 
 address = "F2:29:22:3E:72:78".lower()
 
+# bthci_acl.dst.bd_addr == F2:29:22:3E:72:78 && btatt
 
 def process_packet(packet):
     return packet.btatt.value.replace(':', '')
@@ -12,15 +14,21 @@ def process_packet(packet):
 read_packages = []
 write_packages = []
 
-for file in listdir('logs/'):
+for file in ["btsnoop_hci.log", "btsnoop_hci.log.last"]:
     print(file)
-    packages = FileCapture(f"logs/{file}")
+    packages = FileCapture(f"temp/{file}")
     
     for packet in packages:
         try:
+            if packet.layers[-1].layer_name != "btatt":continue
+            
+            time = datetime.utcfromtimestamp(round(float(packet.frame_info.time_epoch)))
+            if 6 <= time.hour:
+                continue
+
             read = packet.bthci_acl.dst_bd_addr.lower() == address
             write = packet.bthci_acl.src_bd_addr.lower() == address
-                
+
             if not (read or write):
                 continue
 

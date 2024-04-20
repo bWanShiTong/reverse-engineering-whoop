@@ -37,7 +37,7 @@ function sendCommand(deviceId: string) {
       deviceId,
       "61080001-8d6d-82b8-614a-1c8cb0f8dcc6",
       "61080002-8d6d-82b8-614a-1c8cb0f8dcc6",
-      Buffer.from("aa0c00fc24e417000100000087649e49", "hex").toString("base64")
+      Buffer.from("das", "hex").toString("base64")
     )
     .then((char) => {
       delete char["_manager"];

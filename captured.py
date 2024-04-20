@@ -10,7 +10,11 @@ packages = {}
 for row in df.iloc:
     data = row.data
     func = globals().get(f"decode_{data[2:4]}")
-    packages[data[2:4]] = packages.get(data[2:4]) + 1 if packages.get(data[2:4]) else 1
+
+    if packages.get(row.characteristic) is None:
+        packages[row.characteristic] = {}
+
+    packages[row.characteristic][data[2:4]] = packages[row.characteristic].get(data[2:4]) + 1 if packages[row.characteristic].get(data[2:4]) else 1
     if func is None:
         missing[data[2:4]] = missing.get(data[2:4]) + 1 if missing.get(data[2:4]) else 1
     else:

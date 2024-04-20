@@ -1,13 +1,21 @@
 from misc import *
 import numpy as np
 from os import listdir
+from json import dumps
 
 files = listdir('./data')
+FILE = None
+# FILE = "captured-packages-write.txt"
+
 
 packages = {}
 
 for file in files:
-    if not file == "captured-packages-read.txt":continue
+    if FILE:
+        if not file == FILE:continue
+
+    # if file == "captured-packages-write.txt":continue
+
     data = open(f'data/{file}', 'r').read().split('\n')
 
     for package in data:
@@ -22,13 +30,20 @@ for file in files:
 
 
 packages = {i: list(dict.fromkeys(j)) for i,j in packages.items()}
+missing = {}
 
 for package_type in packages:
     packages_ = packages[package_type]
     function = globals().get(f"decode_{package_type}")
     if function is None:
-        print(f"{package_type} not found: {len(packages_)}")
+        missing[package_type] = len(packages_)
         continue
 
     for package in packages_:
         function(package)
+
+packages = {i: len(j) for i,j in packages.items()}
+print(dumps(packages, indent=4))
+
+if missing:
+    print(dumps(missing, indent=4))

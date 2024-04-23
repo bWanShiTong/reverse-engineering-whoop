@@ -14,7 +14,7 @@ for file in files:
     if FILE:
         if not file == FILE:continue
 
-    # if file == "captured-packages-write.txt":continue
+    if file == "captured-packages-write.txt":continue
 
     data = open(f'data/{file}', 'r').read().split('\n')
 
@@ -42,8 +42,8 @@ for package_type in packages:
     for package in packages_:
         function(package)
 
-packages = {i: len(j) for i,j in packages.items()}
-print(dumps(packages, indent=4))
+# packages = {i: len(j) for i,j in packages.items()}
+# print(dumps(packages, indent=4))
 
 if missing:
     print(dumps(missing, indent=4))

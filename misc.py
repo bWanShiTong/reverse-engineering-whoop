@@ -1,4 +1,12 @@
 from datetime import datetime
+from dataclasses import dataclass
+
+@dataclass
+class Packet:
+    unix: int
+
+def padding(buf):
+    assert int(buf, 16) == 0, "Non zero padding"
 
 def little_endian(buffer: str) -> int:
     return int.from_bytes(bytearray.fromhex(buffer), 'little')
@@ -23,20 +31,38 @@ def decode_24(package: str):
     header = package[:10]
     assert header == "aa2400fa30", "Invalid header"
 
-    s0 = package[10:16]
+    s0 = package[10:16] # seems to be around 700-1000 but not enough samples
 
     unix = little_endian(package[16:24])
-    s1 = package[24:34]
+    s1 = package[24:28]
+
+    assert package[28:30] == "14"
+    assert package[30:32] == "00"
+    assert package[32:34] == "02"
+
     s2 = little_endian(package[34:42])
+    assert 500 < s2 and s2 < 700, "Invalid range"
+
     s3 = little_endian(package[42:50])
+    assert 3900 < s3 and s3 < 4100, "Invalid range"
     
-    s4 = package[50:72] # Not sure what any of these are
+    padding(package[50:54])
+
+    s4 = package[54:62] # Not sure what any of these are
+
+    # if byte 62:64 is > 0 then byte 64:66 is 0
+    # if byte 62:64 is 0 then byte 64:66 is 1
+    s00 = int(package[62:64], 16)
+    if s00 == 0:
+        assert int(package[64:66], 16) == 1
+
+    padding(package[66:72])
 
     checksum = package[72:80]
 
 def decode_5c(package: str):
     header = package[:14]
-    assert header == "aa5c00f02f0c05" or header == "aa5c00f02f0c07", "Invalid header"
+    assert header == "aa5c00f02f0c05", "Invalid header"
 
     unix_s = package[14:20]
     separator = package[20:22]
@@ -152,7 +178,7 @@ def decode_10(package: str):
 
                     second_in_day = little_endian(package[16:22]) # Byte [16:18] seems to increment by 1 every time and after overflow byte [18:20] increments
                     s0 = package[20:26]
-                    assert s0 == "010001", "S0 is different"
+                    assert s0 == "010001" or s0 == "010000", s0
                     padding = package[26:32]
                     assert int(padding, 16) == 0, "Non Zero padding"
                 case 66:
@@ -273,3 +299,43 @@ def decode_48(package: str):
     packet_count = package[10:12] # Not sure but seems to increment with every sent package
     assert package[12:14] == "78"
     assert package[14:16] == "01"
+
+def decode_8c(packet: str):
+    header = packet[:10]
+    assert header == "aa8c004a24", "Invalid header"
+    data = packet[10:30]
+
+    unix = little_endian(packet[30:38]) # ? not sure
+    # print(datetime.utcfromtimestamp(unix))
+
+    s0 = packet[38:42]
+
+    data = packet[42:266]
+    assert data == "000034433131313338373000613732343530623337353631343432623266366332313464653962626130396336313164386437643436633636643635333235663062060000000200000010000000290000000f0000000300000000000000080000010000000001110000000200000002"
+
+    padding = packet[266:280]
+    assert int(padding, 16) == 0, "Invalid padding"
+    checksum = packet[280:288]
+
+def decode_4c(packet: str):
+    header = packet[:10]
+    assert header == "aa4c00a724"
+    
+    # byte at 10:12 seems to be incrementing while byte at 12:14 doesn't increment after 10:12 overflows
+    # byte at 14:16 also increments but next byte doesn't change and is always 1
+    s0 = packet[10:16]
+    
+    assert int(packet[16:18], 16) == 1, "Not a one"
+    assert int(packet[18:20], 16) == 1, "Not a one"
+
+    data = packet[20:56]
+
+    padding = packet[56:84]
+    assert int(padding, 16) == 0, "Non zero padding"
+    
+    tt = packet[84:86]
+    assert tt == "32"
+
+    padding = packet[86:152]
+    assert int(padding, 16) == 0, "Non zero padding"
+    checksum = packet[152:160]

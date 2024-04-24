@@ -1,9 +1,9 @@
 from datetime import datetime
 from dataclasses import dataclass
+from time import time
 
-@dataclass
-class Packet:
-    unix: int
+latest_unix = round(time())
+earliest_unix = 1711234800
 
 def padding(buf):
     assert int(buf, 16) == 0, "Non zero padding"
@@ -13,6 +13,11 @@ def little_endian(buffer: str) -> int:
 
 def big_endian(buffer: str) -> int:
     return int.from_bytes(bytearray.fromhex(buffer), 'big')
+
+def check_unix(data: str) -> int:
+    unix = little_endian(data)
+    assert earliest_unix < unix and unix < latest_unix, f"Not a unix: {unix}, {data}"
+    return unix
 
 def pretty_print(buffer: str, as_int: bool=False):
     buffer = [str(int(buffer[i:i+2], 16)).ljust(4) if as_int else buffer[i:i+2] for i in range(0, len(buffer), 2)]
@@ -33,7 +38,7 @@ def decode_24(package: str):
 
     s0 = package[10:16] # seems to be around 700-1000 but not enough samples
 
-    unix = little_endian(package[16:24])
+    unix = check_unix(package[16:24])
     s1 = package[24:28]
 
     assert package[28:30] == "14"
@@ -65,21 +70,25 @@ def decode_5c(package: str):
     assert header == "aa5c00f02f0c05", "Invalid header"
 
     unix_s = package[14:20]
-    separator = package[20:22]
-    assert int(separator, 16) == 0, "Invalid separator"
-    unix_e = package[22:30]
+    padding(package[20:22])
+    unix_e = check_unix(package[22:30])
 
     crc_1 = package[30:32]
     crc_2 = package[32:34]
 
-    s0 = package[34:36]
+    s0 = package[34:36] # These seem to be flags, 1000 0{0,1}00
     s1 = package[36:38]
+    assert s1 == "54", s1 # Same as above
+
     s2 = package[38:40]
     
     s3 = package[40:42]
     assert s3 == "01" or s3 == "00"
 
-    heart_rate = package[42:44] # ?
+    s00 = little_endian(package[38:42])
+    assert 250 <= s00 and s00 <= 350
+
+    heart_rate = int(package[42:44], 16) # ?
 
     count = int(package[44:46], 16)
     s00 = bytearray.fromhex(package[46:62]) # RR?
@@ -88,15 +97,15 @@ def decode_5c(package: str):
         buf = s00[i:i+2]
         rr.append(int.from_bytes(buf, 'little'))
 
-    data0 = package[62:104]
+    flags0 = package[62:66]
+    data0 = package[66:104]
+    
+    padding(package[104:106])
 
-    padding = package[104:106]
-    assert int(padding, 16) == 0, "Non zero padding"
+    flags1 = package[106:110]
+    data1 = package[110:174]
 
-    data1 = package[106:174]
-
-    padding = package[174:182]
-    assert int(padding, 16) == 0
+    padding(package[174:182])
 
     s4 = package[182:184]
     checksum = package[184:]
@@ -116,7 +125,7 @@ def decode_1c(package: str):
     match package_type:
         case '30':
             s0 = little_endian(package[10:16]) # This seems to be incrementing maybe a package count
-            unix = little_endian(package[16:24])
+            unix = check_unix(package[16:24])
 
             s1 = package[24:48]
             
@@ -127,7 +136,7 @@ def decode_1c(package: str):
             padding = package[12:14]
             assert int(padding, 16) == 2, "Invalid padding"
 
-            unix = little_endian(package[14:22]) # ?
+            unix = check_unix(package[14:22]) # ?
 
             temperature = little_endian(package[22:34]) / 100000 # ?
             
@@ -156,14 +165,14 @@ def decode_10(package: str):
     match package_type:
         case "31":
             data = little_endian(package[10:14]) # always around 1000
-            unix = little_endian(package[14:22]) # not sure 100%
+            unix = check_unix(package[14:22]) # not sure 100%
             s0 = package[22:26]
 
             padding = package[26:32]
             assert int(padding, 16) == 0, "Invalid padding"
         case "30":
             data = package[10:16]
-            unix = little_endian(package[16:24]) # not sure 100%
+            unix = check_unix(package[16:24]) # not sure 100%
             s0 = package[24:28]
 
             padding = package[28:32]
@@ -178,11 +187,10 @@ def decode_10(package: str):
 
                     second_in_day = little_endian(package[16:22]) # Byte [16:18] seems to increment by 1 every time and after overflow byte [18:20] increments
                     s0 = package[20:26]
-                    assert s0 == "010001" or s0 == "010000", s0
                     padding = package[26:32]
                     assert int(padding, 16) == 0, "Non Zero padding"
                 case 66:
-                    unix = little_endian(package[16:24])
+                    # unix = check_unix(package[16:24]) # In future but corresponds
                     padding = package[24:32]
                     assert int(padding, 16) == 0, "Non Zero padding"
                 case x:
@@ -192,7 +200,7 @@ def decode_10(package: str):
             s0 = package[10:18]
             has_unix = little_endian(package[18:20]) == 1
             if has_unix:
-                unix = little_endian(package[20:28])
+                unix = check_unix(package[20:28])
                 padding = package[28:32]
                 assert int(padding, 16) == 0, "Non Zero padding"
             else:
@@ -210,13 +218,13 @@ def decode_2c(package: str):
 
     if package[8:10] == '31':
         s1 = package[10:14]
-        unix = package[14:22]
+        unix = check_unix(package[14:22])
 
         s2 = package[22:26]
         rest = package[26:88]
     elif package[8:10] == '30':
         s1 = package[10:16]
-        unix = package[16:24]
+        unix = check_unix(package[16:24])
 
         rest = package[24:88]
     elif package[8:10] == '24':
@@ -228,7 +236,7 @@ def decode_2c(package: str):
 def decode_14(package: str):
     header = package[:6]
     s0 = package[6:16]
-    unix = package[16:24]
+    unix = check_unix(package[16:24])
     s1 = package[24:40]
     checksum = package[40:48]
 
@@ -277,13 +285,13 @@ def decode_18(package: str):
     assert header == "aa1800ff", "Invalid header"
 
     if package[8:10] == '28':
-        unix = package[12:20]
+        unix = check_unix(package[12:20])
         s0 = package[20:22]
         crc = package[22:24]
         s1 = package[24:48]
     elif package[8:10] == '30':
         s0 = package[8:16]
-        unix = package[16:24]
+        unix = check_unix(package[16:24])
         s1 = package[24:48]
     else:
         raise "Unsupported"
@@ -305,8 +313,7 @@ def decode_8c(packet: str):
     assert header == "aa8c004a24", "Invalid header"
     data = packet[10:30]
 
-    unix = little_endian(packet[30:38]) # ? not sure
-    # print(datetime.utcfromtimestamp(unix))
+    unix = check_unix(packet[30:38]) # ? not sure
 
     s0 = packet[38:42]
 

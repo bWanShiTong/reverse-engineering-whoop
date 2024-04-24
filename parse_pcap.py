@@ -43,8 +43,8 @@ for file in listdir('logs/'):
 
     packages.close()
     print(len(read_packages) + len(write_packages), total_packages)
-    # if len(read_packages) + len(write_packages) == total_packages:
-    #     remove(f'logs/{file}')
+    if len(read_packages) + len(write_packages) == total_packages:
+        remove(f'logs/{file}')
         
 
 with open('data/captured-packages-read.txt', 'w') as file:

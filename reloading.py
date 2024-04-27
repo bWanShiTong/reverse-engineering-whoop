@@ -20,7 +20,7 @@ for file in files:
 
     for package in data:
         header = package[2:4]
-        if not header:
+        if not header or header == "00":
             continue
 
         if header_packages := packages.get(header):
@@ -42,8 +42,8 @@ for package_type in packages:
     for package in packages_:
         function(package)
 
-# packages = {i: len(j) for i,j in packages.items()}
-# print(dumps(packages, indent=4))
+packages = {i: len(j) for i,j in packages.items()}
+print(dumps(packages, indent=4))
 
 if missing:
     print(dumps(missing, indent=4))

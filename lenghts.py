@@ -1,16 +1,19 @@
-data = open('data/61080003-8d6d-82b8-614a-1c8cb0f8dcc6.txt', 'r')
+from os import listdir
 
-s = {}
+def check_lengths(file: str):
+    data = open(f'data/{file}', 'r')
 
-for line in data.readlines():
-    line = line.strip()
-    if s.get(line[2:4]):
-        s[line[2:4]].append(len(line))
-    else:
-        s[line[2:4]] = [len(line)]
+    s = {}
 
-for char, lengths in s.items():
-    assert all([lengths[0] == i for i in lengths])
-    bytes_length = int(char, 16)
-    length_in_bytes = lengths[0] / 2 - 4 # Take length of string divide by 2 since 2 hex chars are 1 byte, and remove 4 since that is size of header
-    assert bytes_length == length_in_bytes
+    for line in data.readlines():
+        line = line.strip()
+        bytes_length = int(line[2:4], 16)
+        if bytes_length == 0:
+            continue
+
+        length_in_bytes = len(line[4:]) / 2 - 2 # Take length of string divide by 2 since 2 hex chars are 1 byte, and remove 2 since that is size of header in bytes
+        assert bytes_length == length_in_bytes, f"Expected length: {bytes_length}, actual: {length_in_bytes}, packet: {line}"
+
+for file in listdir('./data'):
+    if file == "captured-packages-write.txt":continue
+    check_lengths(file)

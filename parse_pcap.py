@@ -11,8 +11,8 @@ def process_packet(packet):
     return packet.btatt.value.replace(':', '')
 
 
-read_packages = []
-write_packages = []
+read_packages = {}
+write_packages = {}
 
 for file in listdir('logs/'):
     print(file)
@@ -35,9 +35,9 @@ for file in listdir('logs/'):
             packet = process_packet(packet)
                 
             if write:
-                write_packages.append(packet)
+                write_packages[packet] = None
             else:
-                read_packages.append(packet)
+                read_packages[packet] = None
         except AttributeError:
             continue
 
@@ -48,8 +48,8 @@ for file in listdir('logs/'):
         
 
 with open('data/captured-packages-read.txt', 'w') as file:
-    file.write('\n'.join(read_packages).strip())
+    file.write('\n'.join(read_packages.keys()).strip())
 
 
 with open('data/captured-packages-write.txt', 'w') as file:
-    file.write('\n'.join(write_packages).strip())
+    file.write('\n'.join(write_packages.keys()).strip())

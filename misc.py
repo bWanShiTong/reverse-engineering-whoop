@@ -6,7 +6,7 @@ latest_unix = round(time())
 earliest_unix = 1711234800
 
 def padding(buf):
-    assert int(buf, 16) == 0, "Non zero padding"
+    assert int(buf, 16) == 0, f"Non zero padding: {buf}"
 
 def little_endian(buffer: str) -> int:
     return int.from_bytes(bytearray.fromhex(buffer), 'little')
@@ -65,16 +65,18 @@ def decode_24(package: str):
 
     checksum = package[72:80]
 
-def decode_5c(package: str):
+def decode_5c(package: str, verbose: bool = True):
     header = package[:14]
     assert header == "aa5c00f02f0c05", "Invalid header"
 
     unix_s = package[14:20]
     padding(package[20:22])
     unix_e = check_unix(package[22:30])
+    if verbose:
+        print(datetime.utcfromtimestamp(unix_e), end='\t')
 
-    crc_1 = package[30:32]
-    crc_2 = package[32:34]
+    crc_1 = package[30:32] # Seems to increment by 8
+    crc_2 = package[32:34] # Seems to decrement by 5
 
     s0 = package[34:36] # These seem to be flags, 1000 0{0,1}00
     s1 = package[36:38]
@@ -89,6 +91,8 @@ def decode_5c(package: str):
     assert 250 <= s00 and s00 <= 350
 
     heart_rate = int(package[42:44], 16) # ?
+    if verbose:
+        print(f"HR: {heart_rate}", end='\t')
 
     count = int(package[44:46], 16)
     s00 = bytearray.fromhex(package[46:62]) # RR?
@@ -99,6 +103,7 @@ def decode_5c(package: str):
 
     flags0 = package[62:66]
     data0 = package[66:104]
+    pretty_print(data0)
     
     padding(package[104:106])
 
@@ -168,15 +173,13 @@ def decode_10(package: str):
             unix = check_unix(package[14:22]) # not sure 100%
             s0 = package[22:26]
 
-            padding = package[26:32]
-            assert int(padding, 16) == 0, "Invalid padding"
+            padding(package[26:32])
         case "30":
             data = package[10:16]
             unix = check_unix(package[16:24]) # not sure 100%
             s0 = package[24:28]
 
-            padding = package[28:32]
-            assert int(padding, 16) == 0, "Invalid padding"
+            padding(package[28:32])
         case "23":
             pc = little_endian(package[10:12]) # Increments by 1 but after overflow it doesn't increase next value
             s0 = little_endian(package[12:14])
@@ -186,13 +189,18 @@ def decode_10(package: str):
                     assert one == 1, "Not a 1"
 
                     second_in_day = little_endian(package[16:22]) # Byte [16:18] seems to increment by 1 every time and after overflow byte [18:20] increments
-                    s0 = package[20:26]
-                    padding = package[26:32]
-                    assert int(padding, 16) == 0, "Non Zero padding"
+                    
+                    if 16777215 == second_in_day:
+                        assert package[16:32] == "ffffffffffffffff"
+                    else:
+                        s0 = package[20:26]
+                        padding(package[26:32])
                 case 66:
                     # unix = check_unix(package[16:24]) # In future but corresponds
-                    padding = package[24:32]
-                    assert int(padding, 16) == 0, "Non Zero padding"
+                    padding(package[24:32])
+                case 10:
+                    s0 = package[14:26] # Seems like unix but isn't
+                    padding(package[26:32])
                 case x:
                     print(x)
                     raise "Wong"
@@ -201,11 +209,9 @@ def decode_10(package: str):
             has_unix = little_endian(package[18:20]) == 1
             if has_unix:
                 unix = check_unix(package[20:28])
-                padding = package[28:32]
-                assert int(padding, 16) == 0, "Non Zero padding"
+                padding(package[28:32])
             else:
-                padding = package[20:32]
-                assert int(padding, 16) == 0, "Non Zero padding"
+                padding(package[20:32])
         case x:
             print(x)
             raise
@@ -214,7 +220,6 @@ def decode_10(package: str):
 
 def decode_2c(package: str):
     package_header = package[:8]
-    checksum = package[88:96]
 
     if package[8:10] == '31':
         s1 = package[10:14]
@@ -228,10 +233,13 @@ def decode_2c(package: str):
 
         rest = package[24:88]
     elif package[8:10] == '24':
-        pass
+        # pretty_print(package[10:60])
+        padding(package[60:88])
     else:
         print(package[8:10])
         raise "Wong"
+
+    checksum = package[88:96]
 
 def decode_14(package: str):
     header = package[:6]

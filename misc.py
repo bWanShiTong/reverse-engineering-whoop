@@ -1,9 +1,35 @@
 from datetime import datetime
 from dataclasses import dataclass
 from time import time
+from os import listdir
 
 latest_unix = round(time())
 earliest_unix = 1711234800
+
+def hex_to_array(buf: str):
+    return [int(buf[i:i+2], 16) for i in range(0, len(buf), 2)]
+
+def load_data(FILE: str = None):
+    packages = {}
+    for file in listdir('./data'):
+        if FILE:
+            if not file == FILE:continue
+
+        if file == "captured-packages-write.txt":continue
+
+        data = open(f'data/{file}', 'r').read().split('\n')
+
+        for package in data:
+            header = package[2:4]
+            if not header or header == "00":
+                continue
+
+            if header_packages := packages.get(header):
+                header_packages.append(package)
+            else:
+                packages[header] = [package]
+
+    return {i: list(dict.fromkeys(j)) for i,j in packages.items()}
 
 def padding(buf):
     assert int(buf, 16) == 0, f"Non zero padding: {buf}"
@@ -65,7 +91,7 @@ def decode_24(package: str):
 
     checksum = package[72:80]
 
-def decode_5c(package: str, verbose: bool = True):
+def decode_5c(package: str, verbose: bool = False):
     header = package[:14]
     assert header == "aa5c00f02f0c05", "Invalid header"
 
@@ -92,7 +118,7 @@ def decode_5c(package: str, verbose: bool = True):
 
     heart_rate = int(package[42:44], 16) # ?
     if verbose:
-        print(f"HR: {heart_rate}", end='\t')
+        print(f"HR: {heart_rate}({package[42:44]})", end='\t\t')
 
     count = int(package[44:46], 16)
     s00 = bytearray.fromhex(package[46:62]) # RR?
@@ -103,7 +129,7 @@ def decode_5c(package: str, verbose: bool = True):
 
     flags0 = package[62:66]
     data0 = package[66:104]
-    pretty_print(data0)
+    # pretty_print(data0)
     
     padding(package[104:106])
 

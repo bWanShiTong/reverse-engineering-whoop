@@ -1,35 +1,7 @@
 from misc import *
-import numpy as np
-from os import listdir
 from json import dumps
 
-files = listdir('./data')
-FILE = None
-# FILE = "captured-packages-write.txt"
-
-
-packages = {}
-
-for file in files:
-    if FILE:
-        if not file == FILE:continue
-
-    if file == "captured-packages-write.txt":continue
-
-    data = open(f'data/{file}', 'r').read().split('\n')
-
-    for package in data:
-        header = package[2:4]
-        if not header or header == "00":
-            continue
-
-        if header_packages := packages.get(header):
-            header_packages.append(package)
-        else:
-            packages[header] = [package]
-
-
-packages = {i: list(dict.fromkeys(j)) for i,j in packages.items()}
+packages = load_data()
 missing = {}
 
 for package_type in packages:

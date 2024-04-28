@@ -7,3 +7,4 @@
 /logs
 apk
 logs.log
+.env

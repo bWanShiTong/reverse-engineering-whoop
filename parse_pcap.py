@@ -1,11 +1,11 @@
 from pyshark import FileCapture
-from os import listdir, remove
+from os import listdir, remove, environ
 from datetime import datetime
+from dotenv import load_dotenv
 
+load_dotenv()
 
-address = "F2:29:22:3E:72:78".lower()
-
-# bthci_acl.dst.bd_addr == F2:29:22:3E:72:78 && btatt
+address = environ['MAC_ADDR']
 
 def process_packet(packet):
     return packet.btatt.value.replace(':', '')

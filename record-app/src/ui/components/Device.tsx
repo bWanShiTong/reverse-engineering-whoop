@@ -6,9 +6,11 @@ import { manager } from "../../bluetooth";
 import { requestBluetoothPermission } from "../../bluetooth/permissions";
 import { removeWhoopPackages } from "../../redux/reducers/whoop";
 import { Button } from "react-native";
-import BackgroundFetch from "react-native-background-fetch";
 
 const Buffer = require("buffer/").Buffer;
+
+const BUFFER =
+  "aa0800a8230e16001147c585";
 
 async function uploadPackages() {
   let shouldBreak = false;
@@ -37,10 +39,11 @@ function sendCommand(deviceId: string) {
       deviceId,
       "61080001-8d6d-82b8-614a-1c8cb0f8dcc6",
       "61080002-8d6d-82b8-614a-1c8cb0f8dcc6",
-      Buffer.from("das", "hex").toString("base64")
+      Buffer.from(BUFFER, "hex").toString("base64")
     )
     .then((char) => {
       delete char["_manager"];
+      char.value = Buffer.from(char.value, 'base64').toString('hex')
       console.log(JSON.stringify(char, undefined, 4));
     });
 }

@@ -12,3 +12,7 @@ Or using [extract-logs.sh](./extract-logs.sh) and [parse_pcap.py](./parse_pcap.p
 ## Data decoding
 
 Notes of decoding can be found in [DECODING](./DECODING.md) and functions that decode in [misc.py](./misc.py). 
+
+## Current Progress
+
+Some of write commands have be identified but I can identify algo used to calculate CRC, so I can't test these commands.

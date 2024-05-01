@@ -1,13 +1,15 @@
 from pandas import read_csv
 from json import dumps
+from time import time
 
 from misc import *
 
 df = read_csv('captured.txt', sep=';')
+now = int(time()) - (int(time()) % 86400)
 
 missing = {}
 packages = {}
-for row in df.iloc:
+for row in df[df['unix'] > now].iloc:
     data = row.data
     func = globals().get(f"decode_{data[2:4]}")
 

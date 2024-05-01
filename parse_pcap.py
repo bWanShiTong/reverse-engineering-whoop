@@ -16,6 +16,8 @@ write_packages = {}
 
 for file in listdir('logs/'):
     print(file)
+    # if file != "2024-05-01T07:03:52.log":continue
+
     packages = FileCapture(f"logs/{file}")
 
     total_packages = len(read_packages) + len(write_packages)
@@ -25,9 +27,12 @@ for file in listdir('logs/'):
             if packet.layers[-1].layer_name != "btatt":continue
             
             time = datetime.utcfromtimestamp(round(float(packet.frame_info.time_epoch)))
-
-            read = packet.bthci_acl.dst_bd_addr.lower() == address
-            write = packet.bthci_acl.src_bd_addr.lower() == address
+            # if time.month != 5 or time.hour != 6 or time.minute < 40:
+            #     continue
+            
+            # print(time)
+            read = packet.bthci_acl.dst_bd_addr.upper() == address
+            write = packet.bthci_acl.src_bd_addr.upper() == address
 
             if not (read or write):
                 continue
@@ -43,8 +48,8 @@ for file in listdir('logs/'):
 
     packages.close()
     print(len(read_packages) + len(write_packages), total_packages)
-    if len(read_packages) + len(write_packages) == total_packages:
-        remove(f'logs/{file}')
+    # if len(read_packages) + len(write_packages) == total_packages:
+    #     remove(f'logs/{file}')
         
 
 with open('data/captured-packages-read.txt', 'w') as file:

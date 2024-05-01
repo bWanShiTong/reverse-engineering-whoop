@@ -12,12 +12,12 @@ def find_constants(package: str):
         cur = data[package][i]
 
         for j in range(0, len(prev), 2):
-            if int(prev[j:j+2] ,16)- int(cur[j:j+2],16) == 0 and (constants.get(j) == 0 or constants.get(j) is None):
-                constants[j] = True
+            if int(prev[j:j+2], 16) - int(cur[j:j+2],16) == 0 and (constants.get(j) != False or constants.get(j) is None):
+                constants[j] = prev[j:j+2]
             else:
                 constants[j] = False
 
-    constants = [i for i,j in constants.items() if j]
+    constants = {i:j for i,j in constants.items() if j}
     print(dumps(constants, indent=4))
 
 find_constants(package)

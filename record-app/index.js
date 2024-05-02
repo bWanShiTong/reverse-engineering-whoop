@@ -25,13 +25,13 @@ async function backgroundServiceTimeout(taskId) {
   BackgroundFetch.finish(taskId);
 }
 
-const backgroundFetchHeadlessTask = async (event) => {
+async function backgroundFetchHeadlessTask(event) {
   if (event.timeout) {
     backgroundServiceTimeout(event.taskId);
     return;
   }
 
   await backgroundService(event.taskId);
-};
+}
 
 BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);

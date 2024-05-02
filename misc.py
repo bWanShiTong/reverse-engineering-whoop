@@ -7,6 +7,9 @@ from pandas import read_csv
 latest_unix = round(time()) + 10640000
 earliest_unix = 1711234800
 
+def hex_to_ascii(data: str):
+    return bytearray.fromhex(data).decode(encoding='ascii')
+
 def rr_readings(buffer: str):
     buffer = bytearray.fromhex(buffer)
     n = buffer[0]
@@ -130,8 +133,8 @@ def decode_24(package: str):
 
     checksum = package[72:80]
 
-# @check_constants({0: 'aa', 2: '5c', 4: '00', 6: 'f0', 8: '2f', 10: '0c', 20: '00', 28: '66', 104: '00', 142: '02', 150: '02', 160: '01', 170: '00', 174: '00', 176: '00', 178: '00', 180: '00'})
-def decode_5c(package: str, verbose: bool = False):
+# Main package
+def decode_5c(package: str, verbose: bool = True):
     header = package[:12]
     assert header == "aa5c00f02f0c", f"Invalid header: {header}"
 
@@ -162,6 +165,7 @@ def decode_5c(package: str, verbose: bool = False):
 
     flags0 = package[62:66]
     data0 = package[66:104]
+    # pretty_print(data0)
     
     padding(package[104:106])
 

@@ -3,6 +3,7 @@ import store, { persistor } from "./src/redux";
 import { PersistGate } from "redux-persist/integration/react";
 import HeartRate from "./src/ui/components/HeartRate";
 import Device from "./src/ui/components/Device";
+import { ShowData } from "./src/ui/components/ShowData";
 
 export default function App() {
   return (
@@ -10,6 +11,7 @@ export default function App() {
       <PersistGate persistor={persistor}>
         <Device />
         <HeartRate />
+        <ShowData />
       </PersistGate>
     </Provider>
   );

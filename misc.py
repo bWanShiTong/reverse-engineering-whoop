@@ -115,7 +115,7 @@ def decode_24(package: str):
     assert package[32:34] == "02"
 
     s2 = little_endian(package[34:42])
-    assert 300 < s2 and s2 <= 1000, f"Invalid range: {s2}"
+    assert 200 < s2 and s2 <= 1000, f"Invalid range: {s2}"
 
     s3 = little_endian(package[42:50])
     assert 3700 < s3 and s3 < 4400, f"Invalid range: {s3}"
@@ -152,10 +152,10 @@ def decode_5c(package: str, verbose: bool = True):
     s2 = package[38:40]
     
     s3 = package[40:42]
-    assert s3 == "01" or s3 == "00"
+    # assert s3 == "01" or s3 == "00"
 
     s00 = little_endian(package[38:42])
-    assert 200 <= s00 and s00 <= 550, f"Invalid range: {s00}"
+    # assert 200 <= s00 and s00 <= 550, f"Invalid range: {s00}"
 
     heart_rate = int(package[42:44], 16) # ?
     if verbose:
@@ -165,6 +165,8 @@ def decode_5c(package: str, verbose: bool = True):
 
     flags0 = package[62:66]
     data0 = package[66:104]
+    if verbose:
+        pretty_print(data0, True)
     # pretty_print(data0)
     
     padding(package[104:106])
@@ -172,8 +174,6 @@ def decode_5c(package: str, verbose: bool = True):
     flags1 = package[106:110]
     data1 = package[110:170]
 
-    if verbose:
-        pretty_print(data1[:50], True)
 
     padding(package[170:172])
 

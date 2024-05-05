@@ -23,11 +23,13 @@ def handle(data ,value):
 
 
 
-device.subscribe('61080003-8d6d-82b8-614a-1c8cb0f8dcc6', callback=handle)
-device.subscribe('61080005-8d6d-82b8-614a-1c8cb0f8dcc6', callback=handle)
+# device.subscribe('61080003-8d6d-82b8-614a-1c8cb0f8dcc6', callback=handle)
+# device.subscribe('61080005-8d6d-82b8-614a-1c8cb0f8dcc6', callback=handle)
 
 
-while True:
-    # device.char_write('61080002-8d6d-82b8-614a-1c8cb0f8dcc6', bytearray.fromhex('aa0800a8230e16001147c585'), wait_for_response=False)
-    sleep(1)
-    # pass
+# while True:
+#     # device.char_write('61080002-8d6d-82b8-614a-1c8cb0f8dcc6', bytearray.fromhex('aa0800a8230e16001147c585'), wait_for_response=False)
+#     sleep(1)
+#     # pass
+
+device.char_write('61080002-8d6d-82b8-614a-1c8cb0f8dcc6', bytearray.fromhex('aa0800a8230e16001147c585'), wait_for_response=True)

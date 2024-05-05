@@ -164,10 +164,9 @@ def decode_5c(package: str, verbose: bool = False):
     rr = rr_readings(package[44:62])
 
     flags0 = package[62:66]
-    data0 = package[66:104]
+    data0 = package[66:104] # IDK what this is, but it is not gyroscope or accelerometer, since its values don't change with rotation of device or moving of device
     if verbose:
         pretty_print(data0, True)
-    # pretty_print(data0)
     
     padding(package[104:106])
 
@@ -343,6 +342,7 @@ def decode_44(package: str):
     #   BLE: History burst success. Trim: 0x00000000:0000
     #   BLE: Enabled Entry.
     #   BLE: Command Send Historical D
+    print(data)
 
     assert int(package[134:136], 16) == 0
     checksum = package[136:144]

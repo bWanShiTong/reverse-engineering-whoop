@@ -134,7 +134,7 @@ def decode_24(package: str):
     checksum = package[72:80]
 
 # Main package
-def decode_5c(package: str, verbose: bool = True):
+def decode_5c(package: str, verbose: bool = False):
     header = package[:12]
     assert header == "aa5c00f02f0c", f"Invalid header: {header}"
 

@@ -14,6 +14,7 @@
     "@reduxjs/toolkit": "^2.2.3",
     "@types/react": "~18.2.45",
     "expo": "~50.0.14",
+    "moment": "^2.30.1",
     "react": "18.2.0",
     "react-native": "0.73.6",
     "react-native-background-fetch": "^4.2.4",

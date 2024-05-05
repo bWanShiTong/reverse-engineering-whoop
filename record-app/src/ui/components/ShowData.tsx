@@ -1,10 +1,17 @@
 import { View, Text } from "react-native";
-import { useSelector } from "react-redux";
 import store from "../../redux";
 import { useEffect, useState } from "react";
+import { decode_aa5c } from "../../bluetooth/services/whoop";
+import moment from "moment";
 
 function showPacket(data: string, index: number) {
-  return <Text key={index}>{data}</Text>;
+  let packageData = decode_aa5c(data);
+  return (
+    <View key={index}>
+      <Text>Time: {moment(packageData.unix * 1000).format("DD/MM/YYYY HH:mm:ss")}</Text>
+      <Text>Heart rate: {packageData.heartRate}</Text>
+    </View>
+  );
 }
 
 function generateData() {
@@ -17,16 +24,16 @@ function generateData() {
 export function ShowData() {
   let [data, setData] = useState([]);
 
-  useEffect(() => {
-    setInterval(() => {
-      setData(generateData());
-    }, 1000);
-  }, []);
+  // useEffect(() => {
+  //   setInterval(() => {
+  //     setData(generateData());
+  //   }, 10000);
+  // }, []);
 
   return (
     <View>
       <Text>Data</Text>
-      {data}
+      {/* {data} */}
     </View>
   );
 }

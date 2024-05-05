@@ -101,7 +101,6 @@ Next byte is heart rate.
 
 Next 68 bits seem to represent RR, with first byte being count of measurements and following bytes grouped by 2 bytes are RR
 
-
 Next `0101` seems to be another separator with last 4 bytes being checksum
 
 ```
@@ -156,54 +155,55 @@ Next 8 bytes seem to be corresponding RR values.
 
 Next 21 bytes seem to be some data:
 
-* First 4 bytes seem to be something
-    - First byte is either 0 or 128
-* Next bytes seems to be big integer, mostly `ff`
-* Next 3 bytes IDK
-* Next byte seems to be heart rate
-* Next 3 bytes IDK
-* Next byte seems to be only around 60 or around 190
-* Next 3 bytes IDK
-* Next bytes is around 60 with few outliers around 190
-* Next 3 bytes IDK
-* Next bytes is around 63 with few outliers around 190
+- First 4 bytes seem to be something
+  - First byte is either 0 or 128
+- Next bytes seems to be big integer, mostly `ff`
+- Next 3 bytes IDK
+- Next byte seems to be heart rate
+- Next 3 bytes IDK
+- Next byte seems to be only around 60 or around 190
+- Next 3 bytes IDK
+- Next bytes is around 60 with few outliers around 190
+- Next 3 bytes IDK
+- Next bytes is around 63 with few outliers around 190
 
 Notes:
-* These pairs of 4 bytes where first 3 bytes are "random" and next byte being seeming to be heart rate, could be some type of heart rate occurrences.
+
+- These pairs of 4 bytes where first 3 bytes are "random" and next byte being seeming to be heart rate, could be some type of heart rate occurrences.
 
 Next 32 bytes seem to be similar to data above:
 
-* First byte seems to be mostly zero.
-* Next 5 bytes IDK
-* Next byte seems to be either around 60 or 190
-* Next 3 bytes IDK
-* Next bytes is around 60 with few outliers around 190
-* Next 3 bytes IDK
-* Next bytes is around 63 with few outliers around 190
-* Next byte is either in decimal 11, 26, 30 or 57, this might be due to lack of data
-* Next byte is `02`
-* Next bytes changes with byte before where 11=92, 26=107, 30=111, 57=83
-* Next byte is `02`
-* Next bytes middle value changes with two bytes before, where for first bytes value being 11, this was around 140, first bytes being 26, this was around 10, etc.
-* Next byte is either `03` or `04`
-* Next byte seems to be somewhat connected with previous byte
-* Next byte is `02`
-* Next byte is sort of changing
-* Next byte is `01`
-* Next byte has few values, decimal: 96, 80, 160
-* Next byte is either `03`, `04`, `05` or `06`
-* Next 4 bytes seem to be `010c020c`
-* Next byte seems to be small < 16 number
+- First byte seems to be mostly zero.
+- Next 5 bytes IDK
+- Next byte seems to be either around 60 or 190
+- Next 3 bytes IDK
+- Next bytes is around 60 with few outliers around 190
+- Next 3 bytes IDK
+- Next bytes is around 63 with few outliers around 190
+- Next byte is either in decimal 11, 26, 30 or 57, this might be due to lack of data
+- Next byte is `02`
+- Next bytes changes with byte before where 11=92, 26=107, 30=111, 57=83
+- Next byte is `02`
+- Next bytes middle value changes with two bytes before, where for first bytes value being 11, this was around 140, first bytes being 26, this was around 10, etc.
+- Next byte is either `03` or `04`
+- Next byte seems to be somewhat connected with previous byte
+- Next byte is `02`
+- Next byte is sort of changing
+- Next byte is `01`
+- Next byte has few values, decimal: 96, 80, 160
+- Next byte is either `03`, `04`, `05` or `06`
+- Next 4 bytes seem to be `010c020c`
+- Next byte seems to be small < 16 number
 
 Notes: `02`, `03`, `04` etc, could be sensor position
 
-Next 7 bytes are padding 
+Next 7 bytes are padding
 
 Remaining bytes seem to be checksum
 
 Packages with header `aa1c`
 
-First 7 bytes are header, next 8 bytes seem to be unix, 
+First 7 bytes are header, next 8 bytes seem to be unix,
 
 Next 3 bytes are some data
 
@@ -223,21 +223,35 @@ See [here](./misc.py) for more function of decoding.
 
 -||-
 
-
 ## Notes
 
-* As it is well known device broadcasts data to phone which sends it to servers which give all metrics, but I am not sure in which way is it done, that is, is mobile phone just a proxy which passes data from band to servers, or does phone do some decoding, if phone decodes data before sending it to server some of data could be reverse engineered from apk
+- As it is well known device broadcasts data to phone which sends it to servers which give all metrics, but I am not sure in which way is it done, that is, is mobile phone just a proxy which passes data from band to servers, or does phone do some decoding, if phone decodes data before sending it to server some of data could be reverse engineered from apk
 
-* I think that sleep detection is done on phone, where it detects periods where phone is not being used and checks if heart rate, Sp02 and temperature correspond, reason why I think this is that it has detected few naps while I was working, my RHR is 55-ish and my heart rate when working is 60-ish (I work as dev).
+- I think that sleep detection is done on phone, where it detects periods where phone is not being used and checks if heart rate, Sp02 and temperature correspond, reason why I think this is that it has detected few naps while I was working, my RHR is 55-ish and my heart rate when working is 60-ish (I work as dev).
 
-* As mentioned above, there seem to be some problems if device is shoving Sp02 for 24h/7, but I think that is still being broadcasted all the time to calculate rest.
+- As mentioned above, there seem to be some problems if device is shoving Sp02 for 24h/7, but I think that is still being broadcasted all the time to calculate rest.
 
-* I think that HRV is calculated partially on device and partially on phone/servers, my reason to think this is that data sent over night is roughly the same as data being sent during day (as mentioned above I don't think the device itself detects you sleeping), in order to calculate HRV on server you need to have heart beets and I don't think there is enough data transferred between device and phone for that to be true, I think part of it is calculated for periods on device and that is transferred to phone.
+- I think that HRV is calculated partially on device and partially on phone/servers, my reason to think this is that data sent over night is roughly the same as data being sent during day (as mentioned above I don't think the device itself detects you sleeping), in order to calculate HRV on server you need to have heart beets and I don't think there is enough data transferred between device and phone for that to be true, I think part of it is calculated for periods on device and that is transferred to phone.
 
-* I think something similar is with recording of Sp02, but slightly different, my opinion is that it records it few times then it has something like accuracy level or sureness level, and then rest is sent to servers for processing
+- I think something similar is with recording of Sp02, but slightly different, my opinion is that it records it few times then it has something like accuracy level or sureness level, and then rest is sent to servers for processing
 
-* It seems that on some packages that are 2 timestamps, or duration and timestamp, I think that this is how 24h heart rate is transferred to phone/servers
+- It seems that on some packages that are 2 timestamps, or duration and timestamp, I think that this is how 24h heart rate is transferred to phone/servers
 
-* Strain: this is most likely just heart rate and maybe Sp02
+- Strain: this is most likely just heart rate and maybe Sp02
 
-* Sleep performance: I think this is just duration of actual sleep, compared to recommended duration, my REM and deep sleep are almost always exact percentage so I might be wrong.
+- Sleep performance: I think this is just duration of actual sleep, compared to recommended duration, my REM and deep sleep are almost always exact percentage so I might be wrong.
+
+## Opcodes
+
+These are package opcodes:
+
+```
+{
+    "0x12": 258,
+    "0x52": 2732,
+    "0x1b": 127898,
+    "0x1d": 7
+}
+```
+
+All packages with opcode `0x1d` have following data: `0100ffff`. All packages with opcode `0x12` and `0x52` are write packages, packages with opcode `0x1b` are read packages.

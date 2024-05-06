@@ -255,3 +255,11 @@ These are package opcodes:
 ```
 
 All packages with opcode `0x1d` have following data: `0100ffff`. All packages with opcode `0x12` and `0x52` are write packages, packages with opcode `0x1b` are read packages.
+
+Packages with opcode `0x52` and size `0x48` is used to send command to device, in [`misc.py`](./misc.py) function `decode_48` is used to decode.
+
+Packages with opcode `0x52` and size `0x08` is used to trigger whoop, and whoop then sends data on [#WHOOP_CHAR_CMD_FROM_STRAP](#whoop_char_cmd_from_strap-61080003-8d6d-82b8-614a-1c8cb0f8dcc6) and on [#WHOOP_CHAR_DATA_FROM_STRAP](#whoop_char_data_from_strap-61080005-8d6d-82b8-614a-1c8cb0f8dcc6)
+
+Packages with opcode `0x52` and size `0x10` seem to be used for setting alarm, but not fully sure
+
+I have no idea for what packages with size `0x8c` are used for or what they are

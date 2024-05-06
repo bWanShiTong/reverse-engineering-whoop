@@ -232,7 +232,6 @@ def decode_10(package: str):
     assert header == "aa100057", "Invalid header"
 
     package_type = package[8:10]
-    
     match package_type:
         case "31":
             data = little_endian(package[10:14]) # always around 1000
@@ -317,7 +316,7 @@ def decode_14(package: str):
     s1 = package[24:40]
     checksum = package[40:48]
 
-def decode_44(package: str):
+def decode_44(package: str, verbose: bool = False):
     header = package[:8]
     assert header == "aa44000f", f"Different header: {header}"
 
@@ -342,7 +341,8 @@ def decode_44(package: str):
     #   BLE: History burst success. Trim: 0x00000000:0000
     #   BLE: Enabled Entry.
     #   BLE: Command Send Historical D
-    print(data)
+    if verbose:
+        print(data, end='\n\n')
 
     assert int(package[134:136], 16) == 0
     checksum = package[136:144]
@@ -352,7 +352,7 @@ def decode_0c(package: str):
     assert header == "aa0c00fc", "Invalid header"
 
     data = package[8:24]
-    
+
     checksum = package[24:32]
 
 def decode_18(package: str):
@@ -376,13 +376,26 @@ def decode_18(package: str):
 
 
 def decode_48(package: str):
-    # 15, 14, 12, 11:37, NO alrams
     header = package[:10]
     assert header == "aa4800f323", "Invalid header"
 
     packet_count = package[10:12] # Not sure but seems to increment with every sent package
     assert package[12:14] == "78"
     assert package[14:16] == "01"
+
+    padding(package[82:144])
+    command = bytearray.fromhex(package[16:80]).decode(encoding='ascii')
+    KNOWN_COMMANDS = [
+        bytearray.fromhex("67656e6572616c5f61625f746573740000000000000000000000000000000000").decode(encoding='ascii'), # general_ab_test
+        bytearray.fromhex("73696770726f635f31305f7365635f6470000000000000000000000000000000").decode(encoding='ascii'), # sigproc_10_sec_dp
+        bytearray.fromhex("73696770726f635f706461660000000000000000000000000000000000000000").decode(encoding='ascii'), # sigproc_pdaf
+        bytearray.fromhex("656e61626c655f7231395f7061636b6574730000000000000000000000000000").decode(encoding='ascii'), # enable_r19_packets
+    ]
+    assert command in KNOWN_COMMANDS, f"Unknown command: {command}"
+
+    constants(package[80:82], '32')
+    checksum = package[144:152]
+    return True
 
 def decode_8c(packet: str):
     # print(packet[10:])

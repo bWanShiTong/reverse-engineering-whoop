@@ -17,7 +17,6 @@ write_packages = {}
 
 opcodes = {}
 for file in listdir('logs/'):
-    print(file)
     # if file != "2024-05-01T07:03:52.log":continue
 
     packages = FileCapture(f"logs/{file}")
@@ -34,8 +33,8 @@ for file in listdir('logs/'):
             
             # print(time)
 
-            read = packet.bthci_acl.dst_bd_addr.upper() == address
-            write = packet.bthci_acl.src_bd_addr.upper() == address
+            write = packet.bthci_acl.dst_bd_addr.upper() == address
+            read = packet.bthci_acl.src_bd_addr.upper() == address
 
             if not (read or write):
                 continue
@@ -44,6 +43,11 @@ for file in listdir('logs/'):
             if packet.btatt.opcode == '0x1d':
                 continue
                 
+            # if packet.btatt.opcode != '0x1b':
+            #     continue
+
+            # print(packet)
+            # exit()
             opcodes[packet.btatt.opcode] = opcodes[packet.btatt.opcode] + 1 if opcodes.get(packet.btatt.opcode) else 1
             if write:
                 write_packages[p] = None

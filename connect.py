@@ -13,12 +13,12 @@ adapter.start()
 device = adapter.connect(address, address_type=BLEAddressType.random, timeout=10.0)
 
 
-def handle(data ,value):
-    data = ''.join([format(x, '02x') for x in value])
-    header = data[0:4]
+# def handle(data ,value):
+#     data = ''.join([format(x, '02x') for x in value])
+#     header = data[0:4]
 
-    if header == "aa5c":
-        decode_5c(data)
+#     if header == "aa5c":
+#         decode_5c(data)
 
 
 

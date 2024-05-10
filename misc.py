@@ -8,7 +8,14 @@ latest_unix = round(time()) + 10640000
 earliest_unix = 1711234800
 
 def hex_to_ascii(data: str):
-    return bytearray.fromhex(data).decode(encoding='ascii')
+    command = ""
+    for i in range(0, len(data), 2):
+        try:
+            command += bytearray.fromhex(data[i:i+2]).decode(encoding='ascii')
+        except UnicodeDecodeError:
+            command += ""
+
+    return command
 
 def rr_readings(buffer: str):
     buffer = bytearray.fromhex(buffer)
@@ -115,7 +122,7 @@ def decode_24(package: str):
     assert package[32:34] == "02"
 
     s2 = little_endian(package[34:42])
-    assert 200 < s2 and s2 <= 1000, f"Invalid range: {s2}"
+    assert 150 < s2 and s2 <= 1000, f"Invalid range: {s2}"
 
     s3 = little_endian(package[42:50])
     assert 3700 < s3 and s3 < 4400, f"Invalid range: {s3}"
@@ -260,7 +267,7 @@ def decode_10(package: str):
                         assert package[16:32] == "ffffffffffffffff"
                     else:
                         s3 = package[22:24] # Either 0 or 1
-                        constants(package[22:26], "0002")
+                        # constants(package[22:26], "0002")
                         padding(package[26:32])
 
                 case 66:
@@ -336,13 +343,20 @@ def decode_44(package: str, verbose: bool = False):
     assert int(package[30:32], 16) == 0
     assert int(package[32:34], 16) == 1
     
-    data = bytearray.fromhex(package[34:134]).decode(encoding='ascii')
-    # This is some kind of log ex:
-    #   BLE: History burst success. Trim: 0x00000000:0000
-    #   BLE: Enabled Entry.
-    #   BLE: Command Send Historical D
+    data = package[34:134]
+    command = ""
+    for i in range(0, len(data), 2):
+        try:
+            command += bytearray.fromhex(data[i:i+2]).decode(encoding='ascii')
+        except UnicodeDecodeError:
+            command += ""
+
     if verbose:
-        print(data, end='\n\n')
+        print(command, end='\n\n')
+        # This is some kind of log ex:
+        #   BLE: History burst success. Trim: 0x00000000:0000
+        #   BLE: Enabled Entry.
+        #   BLE: Command Send Historical D
 
     assert int(package[134:136], 16) == 0
     checksum = package[136:144]
@@ -398,7 +412,6 @@ def decode_48(package: str):
     return True
 
 def decode_8c(packet: str):
-    # print(packet[10:])
     header = packet[:10]
     assert header == "aa8c004a24", "Invalid header"
     data = packet[10:24] 
@@ -409,7 +422,8 @@ def decode_8c(packet: str):
     # byte [20:22] seems to be some value
     # byte [22:24] is 01, 02, 03
 
-    padding(packet[24:30])
+    padding(packet[24:28])
+    s00 = packet[28:30]
     unix = check_unix(packet[30:38]) # ? not sure
     s0 = packet[38:42]
 
@@ -446,3 +460,38 @@ def decode_4c(packet: str):
     padding = packet[86:152]
     assert int(padding, 16) == 0, "Non zero padding"
     checksum = packet[152:160]
+
+
+def decode_af(package: str):
+    data = hex_to_ascii(package)
+    # Random and only one package it shows something, I don't know what
+
+def decode_f1(package: str):
+    data = hex_to_ascii(package)
+    # Same as above
+
+def decode_e2(package: str):
+    data = hex_to_ascii(package)
+    # Same as above
+
+def decode_d3(package: str):
+    data = hex_to_ascii(package)
+    # Same as above
+
+def decode_c4(package: str):
+    data = hex_to_ascii(package)
+    # Same as above
+
+def decode_9f(package: str):
+    data = hex_to_ascii(package)
+    # Same as above
+
+def decode_ee(package: str):
+    data = hex_to_ascii(package)
+    # Same as above
+
+def decode_30(package: str):
+    pass
+
+def decode_34(package: str):
+    pass

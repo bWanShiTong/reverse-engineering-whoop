@@ -12,8 +12,8 @@ def process_packet(packet):
     return packet.btatt.value.replace(':', '')
 
 
-read_packages = {}
-write_packages = {}
+read_packages = []
+write_packages = []
 
 opcodes = {}
 for file in listdir('logs/'):
@@ -40,9 +40,17 @@ for file in listdir('logs/'):
                 continue
             
             p = process_packet(packet)
-            if packet.btatt.opcode == '0x1d':
+            if packet.btatt.opcode == '0x1d' or packet.btatt.opcode == '0x12' or len(p) <= 4:
                 continue
                 
+
+            bytes_length = int(p[2:4], 16)
+            if bytes_length == 0:
+                continue
+
+            length_in_bytes = len(p[4:]) / 2 - 2
+            if length_in_bytes != bytes_length:
+                continue
             # if packet.btatt.opcode != '0x1b':
             #     continue
 
@@ -50,9 +58,19 @@ for file in listdir('logs/'):
             # exit()
             opcodes[packet.btatt.opcode] = opcodes[packet.btatt.opcode] + 1 if opcodes.get(packet.btatt.opcode) else 1
             if write:
-                write_packages[p] = None
+                if isinstance(write_packages, list):
+                    write_packages.append(p)
+                elif isinstance(write_packages, dict):
+                    write_packages[p] = None
+                else:
+                    raise "Wong"
             else:
-                read_packages[p] = None
+                if isinstance(read_packages, list):
+                    read_packages.append(p)
+                elif isinstance(read_packages, dict):
+                    read_packages[p] = None
+                else:
+                    raise "Wong"
         except AttributeError:
             continue
 
@@ -62,11 +80,21 @@ for file in listdir('logs/'):
         
 
 with open('data/captured-packages-read.txt', 'w') as file:
-    file.write('\n'.join(read_packages.keys()).strip())
+    if isinstance(read_packages, list):
+        file.write('\n'.join(read_packages).strip())
+    elif isinstance(read_packages, dict):
+        file.write('\n'.join(read_packages.keys()).strip())
+    else:
+        raise "Wong"
 
 
 with open('data/captured-packages-write.txt', 'w') as file:
-    file.write('\n'.join(write_packages.keys()).strip())
+    if isinstance(write_packages, list):
+        file.write('\n'.join(write_packages).strip())
+    elif isinstance(write_packages, dict):
+        file.write('\n'.join(write_packages.keys()).strip())
+    else:
+        raise "Wong"
 
 
 print(dumps(opcodes, indent=4))

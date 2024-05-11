@@ -15,4 +15,7 @@ Notes of decoding can be found in [DECODING](./DECODING.md) and functions that d
 
 ## Current Progress
 
-Some of write commands have be identified but I can identify algo used to calculate CRC, so I can't test these commands.
+Some of write commands have be identified but I can identify algo used to calculate checksum, so I can't test these commands.
+Currently it seems that sending `aa0800a8230e16001147c585` to `61080002-8d6d-82b8-614a-1c8cb0f8dcc6` returns last few minutes of values.
+
+Repo attempting to emulate whoop can be found [here](https://github.com/bWanShiTong/whoop-simulator)

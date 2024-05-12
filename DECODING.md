@@ -42,13 +42,7 @@ See [here](./misc.py) for more function of decoding.
 
 - As mentioned above, there seem to be some problems if device is shoving Sp02 for 24h/7, but I think that is still being broadcasted all the time to calculate rest.
 
-- I think that HRV is calculated partially on device and partially on phone/servers, my reason to think this is that data sent over night is roughly the same as data being sent during day (as mentioned above I don't think the device itself detects you sleeping), in order to calculate HRV on server you need to have heart beets and I don't think there is enough data transferred between device and phone for that to be true, I think part of it is calculated for periods on device and that is transferred to phone.
-
-- I think something similar is with recording of Sp02, but slightly different, my opinion is that it records it few times then it has something like accuracy level or sureness level, and then rest is sent to servers for processing
-
 - It seems that on some packages that are 2 timestamps, or duration and timestamp, I think that this is how 24h heart rate is transferred to phone/servers
-
-- Strain: this is most likely just heart rate and maybe Sp02
 
 - Sleep performance: I think this is just duration of actual sleep, compared to recommended duration, my REM and deep sleep are almost always exact percentage so I might be wrong.
 

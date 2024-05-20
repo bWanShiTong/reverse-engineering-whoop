@@ -317,10 +317,21 @@ def decode_2c(package: str):
     checksum = package[88:96]
 
 def decode_14(package: str):
-    header = package[:6]
-    s0 = package[6:16]
-    unix = check_unix(package[16:24])
-    s1 = package[24:40]
+    constants(package[:8], "aa140003")
+    
+    match package[8:10]:
+        case '30':
+            s0 = package[10:16]
+            unix = check_unix(package[16:24])
+            s1 = package[24:40]
+        case '24':
+            # IDK anything of this package there are only two one has unix in middle and other only zeros
+            # print(package[10:40])
+            pass
+        case x:
+            print(package[8:10])
+            raise "Wong"
+
     checksum = package[40:48]
 
 def decode_44(package: str, verbose: bool = False):

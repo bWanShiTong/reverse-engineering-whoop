@@ -16,7 +16,7 @@ for package_type in packages:
         function(package)
 
 packages = {i: len(j) for i,j in packages.items()}
-# print(dumps(packages, indent=4))
+print(dumps(packages, indent=4))
 
 if missing:
     print(dumps(missing, indent=4))
